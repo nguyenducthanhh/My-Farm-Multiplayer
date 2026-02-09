@@ -1,0 +1,187 @@
+﻿using Firebase;
+using Firebase.Auth;
+using Firebase.Database;
+using Firebase.Extensions;
+using Newtonsoft.Json;
+using System;
+using System.Collections;
+using System.Collections.Generic;
+using Unity.VisualScripting;
+using UnityEditor.Experimental.GraphView;
+using UnityEngine;
+using UnityEngine.Tilemaps;
+
+public class TileMapManager : MonoBehaviour
+{
+    public Tilemap tm_Ground;
+    public Tilemap tm_Grass;
+    public Tilemap tm_Forest;
+    public TileBase tb_Forest;
+    public List<TileBase> lstTb_Pumpkin;
+    private FirebaseDatabaseManager firebaseDatabaseManager;
+    private DatabaseReference reference;
+    public PlayerFarmController playerFarmController;
+
+    //private float checkInterval = 1f; // moi 1 giay
+    private float timer;
+    void Update()
+    {
+        //timer += Time.deltaTime;
+        //if (timer >= checkInterval)
+        //{
+        //    timer = 0f;
+        //   // UpdateGrowingPlants();
+        //}
+    }
+
+    //int GetPumpkinStage(double elapsedTime)
+    //{
+    //    if (elapsedTime > 15) return 3;
+    //    if (elapsedTime > 10) return 2;
+    //    if (elapsedTime > 5) return 1;
+    //    return 0;
+    //}
+
+    //void UpdateGrowingPlants()
+    //{
+    //    var map = LoadDataManager.userInGame.MapInGame;
+    //    if (map == null || map.lstTilemapDetail == null) return;
+
+    //    foreach (var tile in map.lstTilemapDetail)
+    //    {
+    //        if (tile.tilemapState == TileMapState.Pumpkin)
+    //        {
+    //            TilemapDetailToTileBase(tile);
+    //        }
+    //    }
+    //}
+
+    private void Start()
+    {
+
+        firebaseDatabaseManager = GameObject.Find("DatabaseManager").GetComponent<FirebaseDatabaseManager>();
+
+        if(LoadDataManager.userInGame.MapInGame.lstTilemapDetail != null)
+        {
+            LoadMapForUser();
+        }
+        else
+        {
+            WriteAllTileMapToFirebase();
+
+        }
+        FirebaseApp app = FirebaseApp.DefaultInstance;
+        reference = FirebaseDatabase.DefaultInstance.RootReference;
+       
+            
+    }
+
+    public void WriteAllTileMapToFirebase()
+    {
+        List<TilemapDetail> tilemaps = new List<TilemapDetail>();
+        for (int x = tm_Ground.cellBounds.min.x; x < tm_Ground.cellBounds.max.x; x++)
+        {
+            for(int y = tm_Ground.cellBounds.min.y; y < tm_Ground .cellBounds.max.y; y++)
+            {
+                TilemapDetail tm_detail = new TilemapDetail(x, y, TileMapState.Grass, DateTime.Now);
+                tilemaps.Add(tm_detail);
+            }
+
+            LoadDataManager.userInGame.MapInGame = new Map(tilemaps);
+
+            firebaseDatabaseManager.WriteDatabase("Users/" + LoadDataManager.firebaseUser.UserId, LoadDataManager.userInGame.ToString());
+        }
+        
+    }
+
+    public void LoadMapForUser()
+    {
+        MapToUI(LoadDataManager.userInGame.MapInGame);
+
+    }
+    public void TilemapDetailToTileBase(TilemapDetail tilemapDetail)
+    {
+        Vector3Int cellPos = new Vector3Int(tilemapDetail.x, tilemapDetail.y, 0);
+        if (tilemapDetail.tilemapState == TileMapState.Ground)
+        {
+            tm_Grass.SetTile(cellPos, null);
+            tm_Forest.SetTile(cellPos, null);
+        }
+        else if (tilemapDetail.tilemapState == TileMapState.Grass)
+        {
+            tm_Forest.SetTile(cellPos, null);
+        }
+        else if (tilemapDetail.tilemapState == TileMapState.Forest)
+        {
+            tm_Grass.SetTile(cellPos, null);
+            tm_Forest.SetTile(cellPos, tb_Forest);
+        }
+        else if (tilemapDetail.tilemapState == TileMapState.Pumpkin)
+        {
+            //double elapsedTime = (DateTime.Now - tilemapDetail.growTime).TotalSeconds;
+
+            double elapsedTime = DateTime.Now.Subtract(tilemapDetail.growTime).TotalSeconds;
+            tm_Grass.SetTile(cellPos, null);
+
+            if (elapsedTime > 15)
+            {
+                tm_Forest.SetTile(cellPos, lstTb_Pumpkin[3]);
+            }
+
+            else if (elapsedTime > 10)
+            {
+                playerFarmController.StartCoroutine(playerFarmController.GrowPlant(cellPos, tm_Forest, lstTb_Pumpkin.GetRange(2, 2)));
+                tm_Forest.SetTile(cellPos, lstTb_Pumpkin[2]);
+            }
+            else if (elapsedTime > 5)
+            {
+                playerFarmController.StartCoroutine(playerFarmController.GrowPlant(cellPos, tm_Forest, lstTb_Pumpkin.GetRange(1, 3)));
+                tm_Forest.SetTile(cellPos, lstTb_Pumpkin[1]);
+            }
+            else
+            {
+                playerFarmController.StartCoroutine(playerFarmController.GrowPlant(cellPos, tm_Forest, lstTb_Pumpkin.GetRange(0, 4)));
+                tm_Forest.SetTile(cellPos, lstTb_Pumpkin[0]);
+            }
+
+        }
+        //else if (tilemapDetail.tilemapState == TileMapState.Pumpkin)
+        //{
+        //    double elapsedTime = (DateTime.Now - tilemapDetail.growTime).TotalSeconds;
+        //    int newStage = GetPumpkinStage(elapsedTime);
+
+        //    if (newStage != tilemapDetail.growStage)
+        //    {
+        //        tilemapDetail.growStage = newStage;
+
+        //        tm_Grass.SetTile(cellPos, null);
+        //        tm_Forest.SetTile(cellPos, lstTb_Pumpkin[newStage]);
+        //    }
+        //}
+
+    }
+    public void MapToUI(Map map)
+    {
+        Debug.Log("Load map to UI");
+        for(int i = 0; i < map.GetLength(); i++)
+        {
+            TilemapDetailToTileBase(map.lstTilemapDetail[i]);
+        }
+    }
+
+    public void SetStateForTilemapDetail(int x, int y, TileMapState state)
+    {
+        for (int i = 0;i < LoadDataManager.userInGame.MapInGame.GetLength();i++)
+        {
+            if (LoadDataManager.userInGame.MapInGame.lstTilemapDetail[i].x == x && LoadDataManager.userInGame.MapInGame.lstTilemapDetail[i].y == y)
+            {
+                LoadDataManager.userInGame.MapInGame.lstTilemapDetail[i].tilemapState = state;
+                LoadDataManager.userInGame.MapInGame.lstTilemapDetail[i].growTime = DateTime.Now;
+                firebaseDatabaseManager.WriteDatabase("Users/" + LoadDataManager.firebaseUser.UserId, LoadDataManager.userInGame.ToString());
+                Debug.Log("save to firebase successful");
+               
+
+            }
+        }
+    }
+}

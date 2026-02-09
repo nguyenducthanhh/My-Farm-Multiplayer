@@ -1,0 +1,30 @@
+{
+  "project_info": {
+    "project_number": "809877445464",
+    "firebase_url": "https://my-farm-2d-default-rtdb.asia-southeast1.firebasedatabase.app",
+    "project_id": "my-farm-2d",
+    "storage_bucket": "my-farm-2d.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:809877445464:android:9f3458531c72cfd073a32d",
+        "android_client_info": {
+          "package_name": "com.thanh.game2d"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCviQGZMMLf1pqCwqJCkwFGxSVxcVXN9zc"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
