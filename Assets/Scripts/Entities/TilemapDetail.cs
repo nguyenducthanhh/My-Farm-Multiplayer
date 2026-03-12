@@ -7,6 +7,7 @@ using UnityEngine;
 public enum TileMapState
 {
     Ground,
+    GroundWet,
     Grass,
     Forest,
     Pumpkin,
@@ -16,10 +17,16 @@ public class TilemapDetail
 {
     public int x { get; set; }
     public int y { get; set; }
+    //public string groundState { get; set; } 
+    //public string plantType { get; set; }   
+    //public string plantTime { get; set; }   
+    //public bool isWatered { get; set; }
 
     public TileMapState tilemapState { get; set; }
     public DateTime growTime { get; set; }
-   // public int growStage { get; set; }
+   
+   
+    
     public TilemapDetail()
     {
 

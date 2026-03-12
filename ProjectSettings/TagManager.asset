@@ -41,6 +41,9 @@ TagManager:
   - name: Default
     uniqueID: 0
     locked: 0
+  - name: Ground_Wet
+    uniqueID: 4186070699
+    locked: 0
   - name: Ground
     uniqueID: 1305128511
     locked: 0
@@ -55,4 +58,7 @@ TagManager:
     locked: 0
   - name: Tree
     uniqueID: 2103051659
+    locked: 0
+  - name: House
+    uniqueID: 3035315521
     locked: 0

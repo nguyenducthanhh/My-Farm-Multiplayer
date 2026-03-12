@@ -28,12 +28,13 @@ public class LoadDataManager : MonoBehaviour
 
     void Update()
     {
-        
+
     }
+
 
     public void GetUserInGame()
     {
-    
+
         reference.Child("Users").Child(firebaseUser.UserId).GetValueAsync().ContinueWithOnMainThread(task =>
         {
             if (task.IsCompleted)
@@ -48,6 +49,10 @@ public class LoadDataManager : MonoBehaviour
             }
         });
 
-        }
+    }
+
+
+  
+    
 
 }

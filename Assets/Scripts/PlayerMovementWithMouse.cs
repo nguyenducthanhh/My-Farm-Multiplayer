@@ -15,7 +15,8 @@ public class PlayerMovementWithMouse : MonoBehaviour
     private Vector2 input;
     public bool isMove = false;
     private Vector2 direction;
-    public bool CanMove => !farmController.isHoeing;
+    public bool CanMoveHoe => !farmController.isHoeing;
+    public bool CanMoveWater => !farmController.isWatering;
     private void Awake()
     {
         farmController = GetComponent<PlayerFarmController>();
@@ -25,12 +26,21 @@ public class PlayerMovementWithMouse : MonoBehaviour
 
     private void Update()
     {
-        if (Input.GetMouseButtonDown(0) && CanMove)
+        if (Input.GetMouseButtonDown(0) && CanMoveHoe )
         {
-            if (!CanMove) return;
-            input = Camera.main.ScreenToWorldPoint(Input.mousePosition);
+            if (!CanMoveHoe) return;
+           
+                input = Camera.main.ScreenToWorldPoint(Input.mousePosition);
             isMove = true;
             
+        }
+        else if (Input.GetMouseButtonDown(0) && CanMoveWater)
+        {
+            if (!CanMoveWater) return;
+
+            input = Camera.main.ScreenToWorldPoint(Input.mousePosition);
+           isMove = true;
+
         }
         direction = (input - rb.position).normalized;
 
@@ -60,6 +70,25 @@ public class PlayerMovementWithMouse : MonoBehaviour
                 break;
             case FacingDirection.Right:
                 animator.Play("Hoeing-Right");
+                break;
+        }
+    }
+
+    public void PlayWaterAnimation(FacingDirection dir)
+    {
+        switch (dir)
+        {
+            case FacingDirection.Top:
+                animator.Play("Watering-Top");
+                break;
+            case FacingDirection.Down:
+                animator.Play("Watering-Down");
+                break;
+            case FacingDirection.Left:
+                animator.Play("Watering-Left");
+                break;
+            case FacingDirection.Right:
+                animator.Play("Watering-Right");
                 break;
         }
     }
