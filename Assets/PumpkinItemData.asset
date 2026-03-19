@@ -13,6 +13,6 @@ MonoBehaviour:
   m_Name: PumpkinItemData
   m_EditorClassIdentifier: 
   itemName: Pumpkin
-  description: Fresh pumpkin
+  description: "B\xED Ng\xF4"
   itemSprite: {fileID: -1362785183, guid: e7e610f3733a856448271b5772dc8656, type: 3}
   maxStack: 99

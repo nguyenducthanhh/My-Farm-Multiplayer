@@ -88,7 +88,8 @@ public class RecyclableInventory : MonoBehaviour, IRecyclableScrollRectDataSourc
             Debug.LogError($"InventoryItem at index {index} is null!");
             return;
         }
-        item.ConfigureCell(data.name, data.quantity);
+        data.description = itemDatabase.GetDescription(data.name);
+        item.ConfigureCell(data.description, data.quantity);
 
         LoadSpriteForItem(data, item);
 

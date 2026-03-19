@@ -13,6 +13,6 @@ MonoBehaviour:
   m_Name: GrapeItemDatabase
   m_EditorClassIdentifier: 
   itemName: Grape
-  description: Fresh grape
+  description: Nho
   itemSprite: {fileID: 1141153044, guid: e7e610f3733a856448271b5772dc8656, type: 3}
   maxStack: 99
