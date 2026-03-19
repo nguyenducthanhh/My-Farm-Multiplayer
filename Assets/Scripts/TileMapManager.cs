@@ -19,8 +19,7 @@ public class TileMapManager : MonoBehaviour
     public Tilemap tm_Forest;
     public Tilemap tm_GroundWet;
     public TileBase tb_Forest;
-   // public List<TileBase> lstTb_Pumpkin;
-    private FirebaseDatabaseManager firebaseDatabaseManager;
+    [SerializeField] FirebaseDatabaseManager firebaseDatabaseManager;
     private DatabaseReference reference;
     public PlayerFarmController playerFarmController;
 
@@ -38,34 +37,12 @@ public class TileMapManager : MonoBehaviour
         //}
     }
 
-    //int GetPumpkinStage(double elapsedTime)
-    //{
-    //    if (elapsedTime > 15) return 3;
-    //    if (elapsedTime > 10) return 2;
-    //    if (elapsedTime > 5) return 1;
-    //    return 0;
-    //}
-
-    //void UpdateGrowingPlants()
-    //{
-    //    var map = LoadDataManager.userInGame.MapInGame;
-    //    if (map == null || map.lstTilemapDetail == null) return;
-
-    //    foreach (var tile in map.lstTilemapDetail)
-    //    {
-    //        if (tile.tilemapState == TileMapState.Pumpkin)
-    //        {
-    //            TilemapDetailToTileBase(tile);
-    //        }
-    //    }
-    //}
-
     private void Start()
     {
+        //firebaseDatabaseManager = GetComponent<FirebaseDatabaseManager>();
+        //firebaseDatabaseManager = GameObject.Find("DatabaseManager").GetComponent<FirebaseDatabaseManager>();
 
-        firebaseDatabaseManager = GameObject.Find("DatabaseManager").GetComponent<FirebaseDatabaseManager>();
-
-        if(LoadDataManager.userInGame.MapInGame.lstTilemapDetail != null)
+        if (LoadDataManager.userInGame.MapInGame.lstTilemapDetail != null)
         {
             LoadMapForUser();
         }
@@ -127,12 +104,14 @@ public class TileMapManager : MonoBehaviour
         Vector3Int cellPos = new Vector3Int(tilemapDetail.x, tilemapDetail.y, 0);
         if (tilemapDetail.tilemapState == TileMapState.Ground)
         {
+
             tm_Grass.SetTile(cellPos, null);
             tm_Forest.SetTile(cellPos, null);
-            tm_GroundWet.SetTile(cellPos, null);
+
         }
         else if (tilemapDetail.tilemapState == TileMapState.GroundWet)
         {
+
             tm_Ground.SetTile(cellPos, null);
             tm_Grass.SetTile(cellPos, null);
             
@@ -144,7 +123,7 @@ public class TileMapManager : MonoBehaviour
         else if (tilemapDetail.tilemapState == TileMapState.Forest)
         {
             tm_Grass.SetTile(cellPos, null);
-            tm_Forest.SetTile(cellPos, tb_Forest);
+            
         }
                         // Dang dung
         //else if (tilemapDetail.tilemapState == TileMapState.Pumpkin)
@@ -236,12 +215,12 @@ public class TileMapManager : MonoBehaviour
         SaveToFirebase();
     }
 
-    void UpdatePlantVisual(Vector3Int pos, PlantTileData plant, PlantData data)
-    {
-        TileBase tile = data.growthTiles[plant.currentStage];
+    //void UpdatePlantVisual(Vector3Int pos, PlantTileData plant, PlantData data)
+    //{
+    //    TileBase tile = data.growthTiles[plant.currentStage];
 
-        tm_Forest.SetTile(pos, tile);
-    }
+    //    tm_Forest.SetTile(pos, tile);
+    //}
 
     void UpdatePlants()
     {
@@ -259,7 +238,8 @@ public class TileMapManager : MonoBehaviour
 
                 Vector3Int pos = new Vector3Int(plant.x, plant.y, 0);
 
-                UpdatePlantVisual(pos, plant, plantData);
+               //UpdatePlantVisual(pos, plant, plantData);
+                playerFarmController.UpdatePlantVisual(pos, plant);
             }
         }
     }

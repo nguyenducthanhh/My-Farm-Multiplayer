@@ -10,8 +10,7 @@ public enum TileMapState
     GroundWet,
     Grass,
     Forest,
-    Pumpkin,
-    GrapeFruit,
+ 
 }
 public class TilemapDetail
 {

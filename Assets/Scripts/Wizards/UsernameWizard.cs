@@ -6,19 +6,20 @@ using UnityEngine.UI;
 public class UsernameWizard : MonoBehaviour
 {
     public GameObject usernameWizard;
+    public GameObject storageBox;
     public Button buttonOk;
     public InputField inputUsername;
 
-    private FirebaseDatabaseManager databaseManager;
+    [SerializeField] private FirebaseDatabaseManager databaseManager;
     public Text username;
     public Text gold;
     public Text diamond;
     void Start()
     {
-        databaseManager = GameObject.Find("DatabaseManager").GetComponent<FirebaseDatabaseManager>(); // Nên gắn tag để tăng hiệu xuất
         if (LoadDataManager.userInGame.Name == "")
         {
             usernameWizard.SetActive(true);
+            storageBox.SetActive(false);
         }
         else
         {
@@ -44,7 +45,8 @@ public class UsernameWizard : MonoBehaviour
             username.text = inputUsername.text;
 
             usernameWizard.SetActive(false);
-        
+            storageBox.SetActive(true);
+
     }
 
 }

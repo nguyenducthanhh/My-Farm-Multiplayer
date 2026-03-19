@@ -6,6 +6,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Tilemaps;
+using static UnityEditor.PlayerSettings;
 
 public class PlayerFarmController : MonoBehaviour
 {
@@ -15,13 +16,12 @@ public class PlayerFarmController : MonoBehaviour
     [SerializeField] Tilemap tM_GroundWet;
     [SerializeField] TileBase tB_Ground;
     [SerializeField] TileBase tB_Grass;
-    [SerializeField] TileBase tB_Forest;
+    [SerializeField] TileBase tB_GroundWet;
     [SerializeField] PlayerMovementWithMouse player;
 
-    private RecyclableInventory recyclableInventory;
+    [SerializeField] RecyclableInventory recyclableInventory;
    
     public TileMapManager tileMapManager;
-    public List<TileBase> lstTb_Pumpkin;
     Vector2 input;
 
     [System.Serializable]
@@ -32,14 +32,24 @@ public class PlayerFarmController : MonoBehaviour
         public float[] growthTimes;
     }
     public List<PlantData> allPlantDatas;
+    // Them Dictionary
+    private Dictionary<string, PlantData> plantDataDict = new Dictionary<string, PlantData>();
+
+    // Them 2
     public PlantData GetPlantData(string type)
     {
-        return allPlantDatas.Find(p => p.plantType == type);
+        if (plantDataDict.TryGetValue(type, out PlantData data))
+        {
+            return data;
+        }
+
+        return null;
+        //return allPlantDatas.Find(p => p.plantType == type);
     }
     Vector3Int pendingHoeCell;
     public bool isHoeing = false;
     public bool isWatering = false;
-    public bool isatered = false;
+   
     public enum FacingDirection
     {
         Top,
@@ -51,10 +61,11 @@ public class PlayerFarmController : MonoBehaviour
 
     private PlantData selectedPlantData;
     // Chon hat giong
+    // Them 3
     public void SelectPlant(string plantType)
     {
-        selectedPlantData = allPlantDatas.Find(p => p.plantType == plantType);
-
+        //selectedPlantData = allPlantDatas.Find(p => p.plantType == plantType);
+        selectedPlantData = GetPlantData(plantType);
         if (selectedPlantData != null)
         {
             Debug.Log("Selected plant: " + selectedPlantData.plantType);
@@ -64,6 +75,17 @@ public class PlayerFarmController : MonoBehaviour
 
     public int GetStage(PlantData plantData, double elapsed)
     {
+        if (plantData == null)
+        {
+            Debug.LogError("PlantData is null in GetStage!");
+            return 0;
+        }
+
+        if (plantData.growthTimes == null || plantData.growthTimes.Length == 0)
+        {
+            Debug.LogError($"PlantData {plantData.plantType} has invalid growthTimes!");
+            return 0;
+        }
         for (int i = 0; i < plantData.growthTimes.Length; i++)
         {
             if (elapsed < plantData.growthTimes[i])
@@ -71,11 +93,13 @@ public class PlayerFarmController : MonoBehaviour
                 return i;
             }
         }
-
+        if (plantData.growthTiles == null || plantData.growthTiles.Count == 0)
+        {
+            Debug.LogError($"PlantData {plantData.plantType} has invalid growthTiles!");
+            return 0;
+        }
         return plantData.growthTiles.Count - 1;
     }
-
- 
 
     FacingDirection GetFacingDirection(Vector2 dir)
     {
@@ -88,10 +112,22 @@ public class PlayerFarmController : MonoBehaviour
             return dir.y > 0 ? FacingDirection.Top : FacingDirection.Down;
         }
     }
+    // Them 1
+    private void Awake()
+    {
+        plantDataDict.Clear();
 
+        foreach (var plantData in allPlantDatas)
+        {
+            if (plantData == null || string.IsNullOrEmpty(plantData.plantType))
+                continue;
+
+            plantDataDict[plantData.plantType] = plantData;
+        }
+    }
     void Start()
     {
-        recyclableInventory = GameObject.Find("InventoryManager").GetComponent<RecyclableInventory>();
+        //recyclableInventory = GameObject.Find("InventoryManager").GetComponent<RecyclableInventory>();
     }
 
     
@@ -110,10 +146,11 @@ public class PlayerFarmController : MonoBehaviour
         if (isHoeing) return;
         Vector3 mouseWorldPos = Camera.main.ScreenToWorldPoint(Input.mousePosition);
         mouseWorldPos.z = 0f;
+       
         if (Input.GetKeyDown(KeyCode.C))
         {
             Vector3Int cellPos = tM_Ground.WorldToCell(mouseWorldPos);
-           
+            TileBase tileBaseGround = tM_Ground.GetTile(cellPos);
             Debug.Log(cellPos);
             TileBase currentTileBase = tM_Grass.GetTile(cellPos);
             if (currentTileBase == tB_Grass && Vector3.Distance(player.transform.position, mouseWorldPos) <= 1f)
@@ -149,22 +186,27 @@ public class PlayerFarmController : MonoBehaviour
     public float waterDuration = 0.5f;
     public void HandleFarmActionWater()
     {
+       
         if (isWatering) return;
         Vector3 mouseWorldPos = Camera.main.ScreenToWorldPoint(Input.mousePosition);
         mouseWorldPos.z = 0f;
-        if (Input.GetKeyDown(KeyCode.W))
+        if (Input.GetKeyDown(KeyCode.E))
         {
             Vector3Int cellPos = tM_Ground.WorldToCell(mouseWorldPos);
 
-            Debug.Log(cellPos);
-            TileBase currentTileBaseGrass = tM_Grass.GetTile(cellPos);
-            TileBase currentTileBaseGround = tM_Ground.GetTile(cellPos);
             TileBase currentTileBaseForest = tM_Forest.GetTile(cellPos);
-            if (currentTileBaseForest != null && Vector3.Distance(player.transform.position, mouseWorldPos) <= 1f)
+            TileBase currentTileBaseGround = tM_Ground.GetTile(cellPos);
+            PlantTileData plant = tileMapManager.allPlantedTiles
+                .Find(p => p.x == cellPos.x && p.y == cellPos.y);
+
+            if (currentTileBaseGround != null && currentTileBaseForest != null
+            && plant != null
+            && !plant.isWatered 
+            &&Vector3.Distance(player.transform.position, mouseWorldPos) <= 1f)
+
             {
                 Vector2 dirToTile = (mouseWorldPos - player.transform.position).normalized;
                 FacingDirection facing = GetFacingDirection(dirToTile);
-
 
                 pendingHoeCell = cellPos;
 
@@ -175,57 +217,36 @@ public class PlayerFarmController : MonoBehaviour
 
     IEnumerator WaterRoutine(FacingDirection facing)
     {
+
         isWatering = true;
         player.PlayWaterAnimation(facing);
 
         yield return new WaitForSeconds(waterDuration);
 
         tM_Ground.SetTile(pendingHoeCell, null);
-        //tileMapManager.SetStateForTilemapDetail(
-        //    pendingHoeCell.x,
-        //    pendingHoeCell.y,
-        //    TileMapState.GroundWet
-        //);
+
+       tileMapManager.SetStateForTilemapDetail(
+            pendingHoeCell.x,
+            pendingHoeCell.y,
+            TileMapState.GroundWet
+        );
+
+        PlantTileData plant = tileMapManager.allPlantedTiles
+            .Find(p => p.x == pendingHoeCell.x && p.y == pendingHoeCell.y);
+
+
+        if (plant != null)
+        {
+            plant.isWatered = true;
+            plant.plantTimeTicks = DateTime.UtcNow.Ticks;     
+            tileMapManager.SaveToFirebase(); 
+        }
 
         isWatering = false;
+
     }
 
-    //public void HandleFarmAction()
-    //{
-    //    if (!canHoe) return;
-
-    //    tM_Grass.SetTile(pendingHoeCell, null);
-    //    tileMapManager.SetStateForTilemapDetail(pendingHoeCell.x, pendingHoeCell.y, TileMapState.Ground);
-
-    //    canHoe = false;
-    //    isHoeing = false;
-
-    //}
-
-                    // Dang dung
-    //public void HandleFarmActionPlant()
-    //{
-    //    Vector3 mouseWorldPos = Camera.main.ScreenToWorldPoint(Input.mousePosition);
-    //    mouseWorldPos.z = 0f;
-
-    //    if (Input.GetMouseButtonDown(1))
-    //    {
-    //        Vector3Int cellPos = tM_Ground.WorldToCell(mouseWorldPos);
-    //        TileBase currentTileBaseForest = tM_Forest.GetTile(cellPos);
-    //        TileBase currentTileBaseGrass = tM_Grass.GetTile(cellPos);
-    //        TileBase currentTileBaseGround = tM_Ground.GetTile(cellPos);
-    //        if (currentTileBaseForest == null && currentTileBaseGround  != null &&Vector3.Distance(player.transform.position, mouseWorldPos) <= 2f)
-    //        {
-    //            tileMapManager.SetStateForTilemapDetail(cellPos.x, cellPos.y, TileMapState.Pumpkin);
-    //            StartCoroutine(GrowPlant(cellPos, tM_Forest, lstTb_Pumpkin));
-
-
-    //        }
-
-
-    //    }
-    //}
-
+    
     public void HandleFarmActionPlant()
     {
         if (selectedPlantData == null) return;
@@ -239,9 +260,11 @@ public class PlayerFarmController : MonoBehaviour
 
             TileBase currentTileBaseForest = tM_Forest.GetTile(cellPos);
             TileBase currentTileBaseGround = tM_Ground.GetTile(cellPos);
+            TileBase currentTileBaseGrass = tM_Grass.GetTile(cellPos);
 
             if (currentTileBaseForest == null
-                && currentTileBaseGround != null
+                && currentTileBaseGround != null  
+                && currentTileBaseGrass == null
                 && Vector3.Distance(player.transform.position, mouseWorldPos) <= 2f)
             {
 
@@ -254,38 +277,14 @@ public class PlayerFarmController : MonoBehaviour
                 newPlant.isWatered = false;
 
                 tileMapManager.AddPlant(newPlant);
-
-
                 UpdatePlantVisual(cellPos, newPlant);
+
+
             }
         }
     }
-    //Dang dung
-    //public void HandleFarmActionHarvest()
-    //{
-    //    Vector3 mouseWorldPos = Camera.main.ScreenToWorldPoint(Input.mousePosition);
-    //    mouseWorldPos.z = 0f;
 
-    //    if (Input.GetKeyDown(KeyCode.M))
-    //    {
-    //        Vector3Int cellPos = tM_Ground.WorldToCell(mouseWorldPos);
-    //        TileBase currentTileBase = tM_Forest.GetTile(cellPos);
-
-    //        if (currentTileBase == lstTb_Pumpkin[3])
-    //        {
-    //            tM_Grass.SetTile(cellPos, tB_Grass);
-    //            tM_Forest.SetTile(cellPos, null);
-
-    //            // Lay item va them vao tui do
-    //            InventoryItems itemPumpkin = new InventoryItems();
-    //            itemPumpkin.name = ("bi do");
-    //            itemPumpkin.description = ("bi ngon");
-    //            recyclableInventory.AddInventoryItem(itemPumpkin);
-    //            tileMapManager.SetStateForTilemapDetail(cellPos.x, cellPos.y, TileMapState.Grass);
-    //        }
-    //    }
-    //}
-
+    // Them 4
     public void HandleFarmActionHarvest()
     {
         Vector3 mouseWorldPos = Camera.main.ScreenToWorldPoint(Input.mousePosition);
@@ -299,82 +298,94 @@ public class PlayerFarmController : MonoBehaviour
                 .allPlantedTiles
                 .Find(p => p.x == cellPos.x && p.y == cellPos.y);
 
-            if (plant == null) return;
+            if (plant == null)
+            {
+                Debug.Log("No plant found at position");
+                return;
+            }
 
-            PlantData data = allPlantDatas.Find(p => p.plantType == plant.plantType);
 
+            //PlantData data = allPlantDatas.Find(p => p.plantType == plant.plantType);
+            PlantData data = GetPlantData(plant.plantType);
+            if (data == null)
+            {
+                Debug.LogError($"No PlantData found for {plant.plantType}");
+                return;
+            }
             if (plant.currentStage == data.growthTiles.Count - 1)
             {
+                Debug.Log($"Harvesting {plant.plantType} at {cellPos}");
+
                 tM_Forest.SetTile(cellPos, null);
+
+                tM_Ground.SetTile(cellPos, tB_Ground);
+                tM_Grass.SetTile(cellPos, tB_Grass);
+                
+
+                tileMapManager.SetStateForTilemapDetail(cellPos.x, cellPos.y, TileMapState.Grass);
 
                 tileMapManager.allPlantedTiles.Remove(plant);
                 tileMapManager.SaveToFirebase();
+                if (recyclableInventory == null)
+                {
+                    Debug.LogError("RecyclableInventory is null! Make sure it's assigned in Inspector.");
+                    return;
+                }
+                //InventoryItems item = new InventoryItems();
+                //
+                InventoryItems item = new InventoryItems(plant.plantType, $"Fresh {plant.plantType}", 1);
+                Debug.Log($"Adding item to inventory: {item.name}");
 
-                InventoryItems item = new InventoryItems();
-                item.name = plant.plantType;
+                //item.name = plant.plantType;
                 recyclableInventory.AddInventoryItem(item);
             }
         }
     }
-
-    //public IEnumerator GrowPlant(Vector3Int cellPos, Tilemap tilemap, List<TileBase> lstTileBase)
-    //{
-    //    int currentStage = 0;
-    //    while (currentStage < lstTileBase.Count)
-    //    {
-    //        tilemap.SetTile(cellPos, lstTileBase[currentStage]);
-
-    //        yield return new WaitForSeconds(5);
-
-
-    //    }
-    //}
-                    // Dang dung
-    //public void UpdatePlantVisual(Vector3Int cellPos, PlantTileData tile)
-    //{
-    //    PlantData data = allPlants.Find(p => p.plantType == tile.plantType);
-    //    if (data == null) return;
-
-    //    DateTime plantedTime = new DateTime(tile.plantTimeTicks, DateTimeKind.Utc);
-    //    double elapsedTime = (DateTime.UtcNow - plantedTime).TotalSeconds;
-
-    //    int stage = 0;
-
-    //    for (int i = 0; i < data.growthTimes.Length; i++)
-    //    {
-    //        if (elapsedTime >= data.growthTimes[i])
-    //            stage = i;
-    //    }
-
-    //    stage = Mathf.Clamp(stage, 0, data.growthTiles.Count - 1);
-
-    //    tM_Forest.SetTile(cellPos, data.growthTiles[stage]);
-    //}
-
+    // Them 5
     public void UpdatePlantVisual(Vector3Int cellPos, PlantTileData tile)
     {
-        PlantData data = allPlantDatas.Find(p => p.plantType == tile.plantType);
-        if (data == null) return;
+        PlantData data = GetPlantData(tile.plantType);
+        //PlantData data = allPlantDatas.Find(p => p.plantType == tile.plantType);
+        
+       
+        if (data == null)
+        {
+            return;
+        }
+        if (data.growthTimes == null || data.growthTimes.Length == 0 ||
+            data.growthTiles == null || data.growthTiles.Count == 0)
+        {
+            return;
+        }
+
+        if (!tile.isWatered)
+        {
+            tile.currentStage = 0;
+            tM_Forest.SetTile(cellPos, data.growthTiles[0]);
+            return;
+        }
+
+
 
         DateTime plantedTime = new DateTime(tile.plantTimeTicks, DateTimeKind.Utc);
         double elapsedTime = (DateTime.UtcNow - plantedTime).TotalSeconds;
 
-        int stage = 0;
-
-        for (int i = 0; i < data.growthTimes.Length; i++)
-        {
-            if (elapsedTime >= data.growthTimes[i])
-                stage = i;
-        }
+      
+        int stage = GetStage(data, elapsedTime);
 
         stage = Mathf.Clamp(stage, 0, data.growthTiles.Count - 1);
 
         tile.currentStage = stage;
 
-        tM_Forest.SetTile(cellPos, data.growthTiles[stage]);
+        if (stage < data.growthTiles.Count && data.growthTiles[stage] != null)
+        {
+            tM_Forest.SetTile(cellPos, data.growthTiles[stage]);
+        }
+
+     
     }
 
-
+   
 
     public void LoadPlantsFromFirebase()
     {

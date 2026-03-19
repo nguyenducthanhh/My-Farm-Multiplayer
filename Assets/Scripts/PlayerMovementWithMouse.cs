@@ -6,7 +6,7 @@ using static PlayerFarmController;
 public class PlayerMovementWithMouse : MonoBehaviour
 {
 
-    [SerializeField] private float speed = 3f;
+    //[SerializeField] private float speed = 3f;
 
     private PlayerFarmController farmController;
     private Rigidbody2D rb;
@@ -42,18 +42,21 @@ public class PlayerMovementWithMouse : MonoBehaviour
            isMove = true;
 
         }
-        direction = (input - rb.position).normalized;
-
+        //direction = (input - rb.position).normalized;
+        if (isMove)
+        {
+            direction = (input - rb.position).normalized;
+        }
         animator.SetFloat("Horizontal", direction.x);
         animator.SetFloat("Vertical", direction.y);
         animator.SetFloat("Speed", isMove? 1:0);
 
     }
 
-    private void FixedUpdate()
-    {
-        Move();
-    }
+    //private void FixedUpdate()
+    //{
+    //    Move();
+    //}
 
     public void PlayHoeAnimation(FacingDirection dir)
     {
@@ -93,16 +96,25 @@ public class PlayerMovementWithMouse : MonoBehaviour
         }
     }
 
-    private void Move()
-    {
-        if (isMove)
-        {
-            rb.MovePosition(rb.position + direction * speed * Time.fixedDeltaTime);
-
-            if (Vector2.Distance(rb.position, input) <= 0.1f)
-            {
-                isMove = false;
-            }
-        }
-    }
+    //private void Move()
+    //{
+    //    if (isMove)
+    //    {
+            
+    //        if (Vector2.Distance(rb.position, input) <= 0.2f)
+    //        {
+    //            isMove = false;
+    //            rb.velocity = Vector2.zero; 
+    //        }
+    //        else
+    //        {
+    //            rb.velocity = direction * speed;
+    //        }
+    //    }
+    //    else
+    //    {
+            
+    //        rb.velocity = Vector2.zero;
+    //    }
+    //}
 }

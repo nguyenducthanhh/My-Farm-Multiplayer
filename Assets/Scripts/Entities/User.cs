@@ -11,8 +11,8 @@ public class User
     public int Gold { get; set; }
     public int Diamond { get; set; }
     public Map MapInGame { get; set; }
+    public List<InventoryItems> Inventory { get; set; }
 
-    
     public User()
     {
     }
@@ -22,6 +22,7 @@ public class User
         Gold = gold;
         Diamond = diamond;
         MapInGame = mapInGame;
+        Inventory = new List<InventoryItems>();
     }
 
     public override string ToString()
