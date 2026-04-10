@@ -88,9 +88,15 @@ public class TileMapManager : MonoBehaviour
         }
 
         LoadDataManager.userInGame.MapInGame = new Map(tilemaps);
-
+        // 27/3
         firebaseDatabaseManager.WriteDatabase("Users/" + LoadDataManager.firebaseUser.UserId, LoadDataManager.userInGame.ToString());
+    //    string mapJson = JsonConvert.SerializeObject(LoadDataManager.userInGame.MapInGame);
 
+    //    FirebaseDatabase.DefaultInstance
+    //        .GetReference("Users")
+    //        .Child(LoadDataManager.firebaseUser.UserId)
+    //        .Child("MapInGame")
+    //        .SetRawJsonValueAsync(mapJson);
     }
 
     public void LoadMapForUser()
@@ -189,8 +195,28 @@ public class TileMapManager : MonoBehaviour
             {
                 LoadDataManager.userInGame.MapInGame.lstTilemapDetail[i].tilemapState = state;
                 //LoadDataManager.userInGame.MapInGame.lstTilemapDetail[i].growTime = DateTime.Now;
-                firebaseDatabaseManager.WriteDatabase("Users/" + LoadDataManager.firebaseUser.UserId, LoadDataManager.userInGame.ToString());
-              
+
+                //firebaseDatabaseManager.WriteDatabase("Users/" + LoadDataManager.firebaseUser.UserId, LoadDataManager.userInGame.ToString());
+                //27/3
+                string mapJson = JsonConvert.SerializeObject(LoadDataManager.userInGame.MapInGame);
+
+                FirebaseDatabase.DefaultInstance
+                    .GetReference("Users")
+                    .Child(LoadDataManager.firebaseUser.UserId)
+                    .Child("MapInGame")  // ← Chỉ lưu Map
+                    .SetRawJsonValueAsync(mapJson)
+                    .ContinueWithOnMainThread(task =>
+                    {
+                        if (task.IsCompleted)
+                        {
+                            Debug.Log("Map saved successfully!");
+                        }
+                        else
+                        {
+                            Debug.LogError("Failed to save map: " + task.Exception);
+                        }
+                    });
+                break;
 
             }
         }
@@ -200,7 +226,7 @@ public class TileMapManager : MonoBehaviour
     {
         string json = JsonConvert.SerializeObject(allPlantedTiles);
         FirebaseDatabase.DefaultInstance
-            .GetReference("users")
+            .GetReference("Users")
             .Child(LoadDataManager.firebaseUser.UserId)
             .Child("Plants")
             .SetRawJsonValueAsync(json);

@@ -53,15 +53,33 @@ TagManager:
   - name: Plants
     uniqueID: 2787501781
     locked: 0
+  - name: Tree
+    uniqueID: 2103051659
+    locked: 0
+  - name: Bridge
+    uniqueID: 1969903437
+    locked: 0
   - name: Player
     uniqueID: 1435715141
+    locked: 0
+  - name: House
+    uniqueID: 3035315521
     locked: 0
   - name: Fence
     uniqueID: 1274547253
     locked: 0
-  - name: Tree
-    uniqueID: 2103051659
+  - name: Potted_Plant
+    uniqueID: 1038326311
     locked: 0
-  - name: House
-    uniqueID: 3035315521
+  - name: Roof
+    uniqueID: 434127233
+    locked: 0
+  - name: Npc
+    uniqueID: 1696032173
+    locked: 0
+  - name: Animal
+    uniqueID: 2573740305
+    locked: 0
+  - name: Food
+    uniqueID: 2463642927
     locked: 0

@@ -1,4 +1,4 @@
-using UnityEngine;
+﻿using UnityEngine;
 
 [RequireComponent(typeof(Rigidbody2D))]
 [RequireComponent(typeof(Animator))]
@@ -19,6 +19,12 @@ public class PlayerMovement : MonoBehaviour
 
     private void Update()
     {
+        if (UsernameWizard.IsEnteringUsername)
+        {
+            input = Vector2.zero; // Force input = 0
+            UpdateAnimation(input);
+            return; // Bỏ qua việc nhận input
+        }
         input.x = Input.GetAxisRaw("Horizontal");
         input.y = Input.GetAxisRaw("Vertical");
 
@@ -28,6 +34,11 @@ public class PlayerMovement : MonoBehaviour
 
     private void FixedUpdate()
     {
+        if (UsernameWizard.IsEnteringUsername)
+        {
+            rb.velocity = Vector2.zero; // Force dừng lại
+            return;
+        }
         Move(input);
     }
 

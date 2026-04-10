@@ -1,0 +1,28 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 246d0056b0efa534ebb111be4a870016, type: 3}
+  m_Name: CarrotItemData
+  m_EditorClassIdentifier: 
+  itemName: Carrot
+  description: "C\xE0 r\u1ED1t"
+  maxStack: 99
+  seedSprite: {fileID: -1904839205, guid: e7e610f3733a856448271b5772dc8656, type: 3}
+  harvestedSprite: {fileID: 596939715, guid: e7e610f3733a856448271b5772dc8656, type: 3}
+  basePrice: 10
+  sellPrice: 10
+  isSellable: 1
+  isPurchasable: 1
+  isSeed: 0
+  isFood: 0
+  isTool: 1
+  harvestedItemName: "C\xE0 r\u1ED1t"
+  harvestQuantity: 1

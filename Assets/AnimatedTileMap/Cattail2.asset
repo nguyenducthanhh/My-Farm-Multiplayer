@@ -1,0 +1,29 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 13b75c95f34a00d4e8c04f76b73312e6, type: 3}
+  m_Name: Cattail2
+  m_EditorClassIdentifier: 
+  m_AnimatedSprites:
+  - {fileID: 56898872, guid: 582179ce8c5a04348b47753b2dddb74a, type: 3}
+  - {fileID: 2070830326, guid: 582179ce8c5a04348b47753b2dddb74a, type: 3}
+  - {fileID: -872342633, guid: 582179ce8c5a04348b47753b2dddb74a, type: 3}
+  - {fileID: -831680369, guid: 582179ce8c5a04348b47753b2dddb74a, type: 3}
+  - {fileID: -1671595884, guid: 582179ce8c5a04348b47753b2dddb74a, type: 3}
+  - {fileID: 780634298, guid: 582179ce8c5a04348b47753b2dddb74a, type: 3}
+  - {fileID: 1819451889, guid: 582179ce8c5a04348b47753b2dddb74a, type: 3}
+  - {fileID: -571811893, guid: 582179ce8c5a04348b47753b2dddb74a, type: 3}
+  m_MinSpeed: 10
+  m_MaxSpeed: 10
+  m_AnimationStartTime: 0
+  m_AnimationStartFrame: 0
+  m_TileColliderType: 0
+  m_TileAnimationFlags: 0

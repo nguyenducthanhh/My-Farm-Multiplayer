@@ -14,9 +14,9 @@ public class RecyclableInventory : MonoBehaviour, IRecyclableScrollRectDataSourc
     [SerializeField] private GameObject inventoryGameObject;
 
     [Header("Item Database")]
-    [SerializeField] private ItemDatabase itemDatabase;
+    [SerializeField] public ItemDatabase itemDatabase;
 
-    private List<InventoryItems> _invenItems = new List<InventoryItems>();
+    public List<InventoryItems> _invenItems = new List<InventoryItems>();
     private Dictionary<string, Sprite> spriteCache = new Dictionary<string, Sprite>();
 
     private void Awake()
@@ -45,8 +45,24 @@ public class RecyclableInventory : MonoBehaviour, IRecyclableScrollRectDataSourc
 
     private void Update()
     {
+        if (UsernameWizard.IsEnteringUsername)
+        {
+            return; // Bỏ qua input B
+        }
         if (Input.GetKeyDown(KeyCode.B))
         {
+            // NẾU ĐANG MỞ INVENTORY → ĐÓNG VÀ CANCEL SLOT SELECTION
+            if (inventoryGameObject.activeSelf)
+            {
+                // Đóng slot selection panel nếu đang mở
+                var farmController = FindObjectOfType<PlayerFarmController>();
+                if (farmController != null)
+                {
+                    farmController.CancelSlotSelection();
+                    Debug.Log("🚫 Auto-cancelled slot selection when closing inventory");
+                }
+            }
+
             inventoryGameObject.SetActive(!inventoryGameObject.activeSelf);
 
             if (inventoryGameObject.activeSelf && needReload)
@@ -56,6 +72,7 @@ public class RecyclableInventory : MonoBehaviour, IRecyclableScrollRectDataSourc
             }
         }
     }
+
     public int GetItemCount()
     {
         return _invenItems.Count;
@@ -89,11 +106,57 @@ public class RecyclableInventory : MonoBehaviour, IRecyclableScrollRectDataSourc
             return;
         }
         data.description = itemDatabase.GetDescription(data.name);
-        item.ConfigureCell(data.description, data.quantity);
-
+        //item.ConfigureCell(data.description, data.quantity);
+        item.ConfigureCell(data.name, data.quantity);
         LoadSpriteForItem(data, item);
 
     }
+    //private void LoadSpriteForItem(InventoryItems item, InventoryCell cell)
+    //{
+    //    if (item == null || cell == null || string.IsNullOrEmpty(item.name))
+    //    {
+    //        Debug.LogError("Invalid item or cell in LoadSpriteForItem!");
+    //        return;
+    //    }
+    //    if (spriteCache.ContainsKey(item.name))
+    //    {
+    //        cell.SetSprite(spriteCache[item.name]);
+    //        return;
+    //    }
+
+
+    //    Sprite sprite = null;
+
+    //    //Sprite sprite = Resources.Load<Sprite>($"ItemSprites/{item.name}");
+
+    //    if (itemDatabase != null)
+    //    {
+    //        sprite = itemDatabase.GetSprite(item.name);
+    //        if (sprite != null)
+    //        {
+    //            spriteCache[item.name] = sprite;
+    //            cell.SetSprite(sprite);
+    //            return;
+    //        }
+    //    }
+
+    //    sprite = Resources.Load<Sprite>($"ItemSprites/{item.name}");
+
+    //    if (sprite != null)
+    //    {
+    //        spriteCache[item.name] = sprite;
+    //        cell.SetSprite(sprite);
+    //    }
+    //    else
+    //    {
+    //        sprite = Resources.Load<Sprite>("ItemSprites/default");
+    //        if (sprite != null)
+    //        {
+    //            cell.SetSprite(sprite);
+    //        }
+    //    }
+    //}
+    //Them 27/3
     private void LoadSpriteForItem(InventoryItems item, InventoryCell cell)
     {
         if (item == null || cell == null || string.IsNullOrEmpty(item.name))
@@ -101,20 +164,19 @@ public class RecyclableInventory : MonoBehaviour, IRecyclableScrollRectDataSourc
             Debug.LogError("Invalid item or cell in LoadSpriteForItem!");
             return;
         }
+
         if (spriteCache.ContainsKey(item.name))
         {
             cell.SetSprite(spriteCache[item.name]);
             return;
         }
 
-
         Sprite sprite = null;
-
-        //Sprite sprite = Resources.Load<Sprite>($"ItemSprites/{item.name}");
 
         if (itemDatabase != null)
         {
             sprite = itemDatabase.GetSprite(item.name);
+
             if (sprite != null)
             {
                 spriteCache[item.name] = sprite;
@@ -124,7 +186,6 @@ public class RecyclableInventory : MonoBehaviour, IRecyclableScrollRectDataSourc
         }
 
         sprite = Resources.Load<Sprite>($"ItemSprites/{item.name}");
-
         if (sprite != null)
         {
             spriteCache[item.name] = sprite;
@@ -138,6 +199,33 @@ public class RecyclableInventory : MonoBehaviour, IRecyclableScrollRectDataSourc
                 cell.SetSprite(sprite);
             }
         }
+    }
+
+
+
+    private ItemContext DetermineItemContext(string itemName)
+    {
+        if (itemName.EndsWith("_seed"))
+            return ItemContext.Seed;
+        else if (itemName.EndsWith("_fruit") || itemName.EndsWith("_harvested"))
+            return ItemContext.Harvested;
+        else
+            return ItemContext.Default;
+    }
+
+    private string GetBaseItemName(string itemName)
+    {
+        // "pumpkin_fruit" → "pumpkin"
+        // "grape_seed" → "grape"
+
+        if (itemName.EndsWith("_fruit"))
+            return itemName.Replace("_fruit", "");
+        else if (itemName.EndsWith("_seed"))
+            return itemName.Replace("_seed", "");
+        else if (itemName.EndsWith("_harvested"))
+            return itemName.Replace("_harvested", "");
+
+        return itemName;
     }
 
 
@@ -175,6 +263,16 @@ public class RecyclableInventory : MonoBehaviour, IRecyclableScrollRectDataSourc
         //    _recyclableScrollRect.ReloadData();
         //    Debug.Log("Inventory reloaded immediately");
         //}
+        //if (_recyclableScrollRect != null && _recyclableScrollRect.gameObject.activeInHierarchy)
+        //{
+        //    _recyclableScrollRect.ReloadData();
+        //    Debug.Log("Inventory reloaded immediately");
+        //}
+        //else
+        //{
+        //    needReload = true;
+        //    Debug.Log("Inventory inactive, marked for reload when opened");
+        //}
         if (_recyclableScrollRect != null && _recyclableScrollRect.gameObject.activeInHierarchy)
         {
             _recyclableScrollRect.ReloadData();
@@ -200,18 +298,33 @@ public class RecyclableInventory : MonoBehaviour, IRecyclableScrollRectDataSourc
             }
         }
 
-        if (gameObject.activeInHierarchy && _recyclableScrollRect != null)
+        //if (gameObject.activeInHierarchy && _recyclableScrollRect != null)
+        //{
+        //    _recyclableScrollRect.ReloadData();
+        //}
+        //else
+        //{
+        //    needReload = true;
+        //}
+        if (_recyclableScrollRect != null && _recyclableScrollRect.gameObject.activeInHierarchy)
         {
             _recyclableScrollRect.ReloadData();
         }
         else
         {
             needReload = true;
+            Debug.Log("Inventory inactive, marked for reload when opened");
         }
         // _recyclableScrollRect.ReloadData();
         SaveInventoryToFirebase();
     }
+    public int GetItemQuantity(string itemName)
+    {
+        if (_invenItems == null) return 0;
 
+        var item = _invenItems.Find(i => i.name == itemName);
+        return item?.quantity ?? 0;
+    }
     public void SaveInventoryToFirebase()
     {
         if (LoadDataManager.userInGame == null)
@@ -233,7 +346,7 @@ public class RecyclableInventory : MonoBehaviour, IRecyclableScrollRectDataSourc
             string json = JsonConvert.SerializeObject(_invenItems);
             Debug.Log($"Saving inventory to Firebase: {json}");
             FirebaseDatabase.DefaultInstance
-                .GetReference("users")
+                .GetReference("Users")
                 .Child(LoadDataManager.firebaseUser.UserId)
                 .Child("Inventory")
                 .SetRawJsonValueAsync(json)
@@ -253,7 +366,7 @@ public class RecyclableInventory : MonoBehaviour, IRecyclableScrollRectDataSourc
     public void LoadInventoryFromFirebase()
     {
         FirebaseDatabase.DefaultInstance
-            .GetReference("users")
+            .GetReference("Users")
             .Child(LoadDataManager.firebaseUser.UserId)
             .Child("Inventory")
             .GetValueAsync()

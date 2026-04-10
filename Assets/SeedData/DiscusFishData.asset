@@ -1,0 +1,28 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 246d0056b0efa534ebb111be4a870016, type: 3}
+  m_Name: DiscusFishData
+  m_EditorClassIdentifier: 
+  itemName: discus_fish
+  description: "C\xE1 d\u0129a \u0111\u1ECF s\u1ECDc xanh"
+  maxStack: 99
+  seedSprite: {fileID: 0}
+  harvestedSprite: {fileID: 1164441544, guid: b0cb26309759d434a9d72ec45bb6f9d7, type: 3}
+  basePrice: 5
+  sellPrice: 5
+  isSellable: 1
+  isPurchasable: 1
+  isSeed: 0
+  isFood: 1
+  isTool: 0
+  harvestedItemName: 
+  harvestQuantity: 1

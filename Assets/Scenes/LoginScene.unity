@@ -318,6 +318,7 @@ MonoBehaviour:
   ipLoginEmail: {fileID: 2016420219}
   ipLoginPassword: {fileID: 1032819968}
   buttonLogin: {fileID: 122246571}
+  gold: 1000
   buttonMoveToSignIn: {fileID: 1898577278}
   buttonMoveToRegister: {fileID: 2018298979}
   registerForm: {fileID: 1621087486}

@@ -1,0 +1,31 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 13b75c95f34a00d4e8c04f76b73312e6, type: 3}
+  m_Name: Frog_Eating
+  m_EditorClassIdentifier: 
+  m_AnimatedSprites:
+  - {fileID: 860043148, guid: 5a18c320dd021f54fb2c5e600f116b3b, type: 3}
+  - {fileID: 376482849, guid: 5a18c320dd021f54fb2c5e600f116b3b, type: 3}
+  - {fileID: -952240067, guid: 5a18c320dd021f54fb2c5e600f116b3b, type: 3}
+  - {fileID: 1115772416, guid: 5a18c320dd021f54fb2c5e600f116b3b, type: 3}
+  - {fileID: 1161144596, guid: 5a18c320dd021f54fb2c5e600f116b3b, type: 3}
+  - {fileID: -1170395759, guid: 5a18c320dd021f54fb2c5e600f116b3b, type: 3}
+  - {fileID: -1638247578, guid: 5a18c320dd021f54fb2c5e600f116b3b, type: 3}
+  - {fileID: -165567869, guid: 5a18c320dd021f54fb2c5e600f116b3b, type: 3}
+  - {fileID: -1551500131, guid: 5a18c320dd021f54fb2c5e600f116b3b, type: 3}
+  - {fileID: 191503999, guid: 5a18c320dd021f54fb2c5e600f116b3b, type: 3}
+  m_MinSpeed: 8
+  m_MaxSpeed: 8
+  m_AnimationStartTime: 0
+  m_AnimationStartFrame: 0
+  m_TileColliderType: 0
+  m_TileAnimationFlags: 0
