@@ -52,6 +52,17 @@ public class AnimalPenController : MonoBehaviour
 
     private void Start()
     {
+        string penUnlockName = GetPenUnlockName(); // "chicken_pen", "pig_pen", etc.
+
+        if (!LevelSystem.Instance.IsItemUnlocked(penUnlockName))
+        {
+            int requiredLevel = LevelSystem.Instance.GetRequiredLevelForItem(penUnlockName);
+            Debug.Log($"🔒 Chuồng chưa mở khóa! Cần cấp {requiredLevel}");
+
+            // ✅ Disable chuồng
+            gameObject.SetActive(false);
+            return;
+        }
         if (feedButton != null)
             feedButton.onClick.AddListener(OnFeedButtonClicked);
 
@@ -121,6 +132,16 @@ public class AnimalPenController : MonoBehaviour
         }
     }
 
+    private string GetPenUnlockName()
+    {
+        return animalType switch
+        {
+            AnimalType.Chicken => "chicken_pen",
+            AnimalType.Pig => "pig_pen",
+            AnimalType.Cow => "cow_pen",
+            _ => "unknown_pen"
+        };
+    }
     private void ShowUI()
     {
         if (uiPanel != null)

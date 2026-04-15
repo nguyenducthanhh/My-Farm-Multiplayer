@@ -1,0 +1,72 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: deaa3c40c35da4a4ca4789aaa9ca7f74, type: 3}
+  m_Name: QuestConfig
+  m_EditorClassIdentifier: 
+  allQuests:
+  - questId: 1
+    questName: "L\xFAa"
+    questDescription: "Mang 2 l\xFAa \u0111\u1EBFn cho t\xF4i"
+    requirements:
+    - itemName: Paddy_seed
+      quantity: 2
+      itemDescription: "H\u1EA1t gi\u1ED1ng l\xFAa"
+    - itemName: Paddy_fruit
+      quantity: 1
+      itemDescription: "L\xFAa"
+    rewardGold: 10
+    rewardExperience: 40
+  - questId: 2
+    questName: "L\xFAa2"
+    questDescription: "Mang 1 l\xFAa \u0111\u1EBFn cho t\xF4i"
+    requirements:
+    - itemName: Paddy_fruit
+      quantity: 1
+      itemDescription: "L\xFAa"
+    rewardGold: 10
+    rewardExperience: 40
+  - questId: 3
+    questName: "L\xFAa3"
+    questDescription: "Mang 3 l\xFAa \u0111\u1EBFn cho t\xF4i"
+    requirements:
+    - itemName: Paddy_fruit
+      quantity: 3
+      itemDescription: "L\xFAa"
+    rewardGold: 10
+    rewardExperience: 40
+  - questId: 4
+    questName: "L\xFAa3"
+    questDescription: "Mang 3 l\xFAa \u0111\u1EBFn cho t\xF4i"
+    requirements:
+    - itemName: Paddy_fruit
+      quantity: 3
+      itemDescription: "L\xFAa"
+    rewardGold: 10
+    rewardExperience: 40
+  - questId: 5
+    questName: "Ng\xF4"
+    questDescription: "Mang 3 ng\xF4 \u0111\u1EBFn cho t\xF4i"
+    requirements:
+    - itemName: Corn_fruit
+      quantity: 3
+      itemDescription: "Ng\xF4"
+    rewardGold: 10
+    rewardExperience: 40
+  - questId: 6
+    questName: Nho
+    questDescription: "Mang 3 nho \u0111\u1EBFn cho t\xF4i"
+    requirements:
+    - itemName: Grape_fruit
+      quantity: 3
+      itemDescription: Nho
+    rewardGold: 10
+    rewardExperience: 40

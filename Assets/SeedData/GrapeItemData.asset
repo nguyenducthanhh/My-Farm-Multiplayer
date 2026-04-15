@@ -21,7 +21,7 @@ MonoBehaviour:
   sellPrice: 10
   isSellable: 1
   isPurchasable: 1
-  isSeed: 0
+  isSeed: 1
   isFood: 0
   isTool: 1
   harvestedItemName: "Nho t\u01B0\u01A1i"

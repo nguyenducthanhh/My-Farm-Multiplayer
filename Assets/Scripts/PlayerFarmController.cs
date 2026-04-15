@@ -71,6 +71,7 @@ public class PlayerFarmController : MonoBehaviour
         Left,
         Right
     }
+    private List<string> availableSeeds = new List<string>();
 
     //public void AssignToSlot1()
     //{
@@ -338,6 +339,7 @@ public class PlayerFarmController : MonoBehaviour
     }
     void Start()
     {
+        LoadAvailableSeeds();
         // Load seed slots from Firebase
         if (seedSlot1 != null)
             seedSlot1.LoadSlotDataFromFirebase();
@@ -570,6 +572,36 @@ public class PlayerFarmController : MonoBehaviour
 
             }
         }
+    }
+
+    private void LoadAvailableSeeds()
+    {
+        availableSeeds.Clear();
+
+        string[] allSeeds = { "Paddy", "Corn", "Carrot", "Strawberry", "Grape", "Pumpkin" };
+
+        foreach (var seed in allSeeds)
+        {
+            // ✅ Kiểm tra hạt giống có được mở khóa không
+            if (LevelSystem.Instance.IsItemUnlocked(seed))
+            {
+                availableSeeds.Add(seed);
+                Debug.Log($"✅ Available: {seed}");
+            }
+            else
+            {
+                int requiredLevel = LevelSystem.Instance.GetRequiredLevelForItem(seed);
+                Debug.Log($"🔒 Locked: {seed} (Cấp {requiredLevel})");
+            }
+        }
+
+        Debug.Log($"📋 Total available seeds: {availableSeeds.Count}");
+    }
+
+    // ✅ THÊM: Getter
+    public bool IsSeedAvailable(string seedName)
+    {
+        return availableSeeds.Contains(seedName);
     }
     //Them 27/3
     private void CreateHarvestedFruit(string plantType)
