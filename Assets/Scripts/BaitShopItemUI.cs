@@ -32,6 +32,13 @@ public class BaitShopItemUI : MonoBehaviour
 
     private void UpdateButtonState()
     {
+        // ✅ THÊM: Kiểm tra baitItem có null không
+        if (baitItem == null)
+        {
+            Debug.LogWarning("⚠️ BaitItem is not initialized yet!");
+            return;
+        }
+
         if (purchaseButton != null && LoadDataManager.userInGame != null)
         {
             bool canAfford = LoadDataManager.userInGame.Gold >= baitItem.price;
@@ -48,6 +55,13 @@ public class BaitShopItemUI : MonoBehaviour
 
     private void OnPurchaseClicked()
     {
+        // ✅ THÊM: Kiểm tra fishermanController
+        if (fishermanController == null)
+        {
+            Debug.LogError("❌ FishermanController is null!");
+            return;
+        }
+
         fishermanController.PurchaseBait(baitItem);
         UpdateButtonState();
     }
@@ -57,4 +71,3 @@ public class BaitShopItemUI : MonoBehaviour
         UpdateButtonState();
     }
 }
-

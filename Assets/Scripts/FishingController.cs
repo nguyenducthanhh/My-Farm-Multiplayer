@@ -194,6 +194,7 @@ public class FishingController : MonoBehaviour
 
         // ✅ Thực hiện animation thả câu
         PlayCastAnimation();
+        AudioManager.Instance.PlayCastSound();
 
         Debug.Log($"✅ Bắt đầu câu cá, sẽ xong sau {fishingDuration}s");
 
@@ -213,6 +214,7 @@ public class FishingController : MonoBehaviour
 
         // ✅ Thực hiện animation thu cần
         PlayReelAnimation();
+        AudioManager.Instance.PlayReelSound();
 
         // ✅ Random cá
         string caughtFish = GetRandomFish();

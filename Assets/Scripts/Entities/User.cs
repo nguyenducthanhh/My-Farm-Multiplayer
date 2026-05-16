@@ -10,8 +10,18 @@ public class User
     public Map MapInGame { get; set; }
     public List<InventoryItems> Inventory { get; set; }
 
+    [System.Serializable]
+    public class PlayerPosition
+    {
+        public float x;
+        public float y;
+        public float z;
+    }
+    public PlayerPosition LastPosition { get; set; }
+
     public User()
     {
+        LastPosition = new PlayerPosition { x = 0, y = 0, z = 0 };
     }
 
     //public User(string name, int gold)

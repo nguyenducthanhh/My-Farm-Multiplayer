@@ -7,7 +7,6 @@ using System.Collections.Generic;
 using Unity.Mathematics;
 using UnityEngine;
 using UnityEngine.Tilemaps;
-using static UnityEditor.PlayerSettings;
 
 public class PlayerFarmController : MonoBehaviour
 {
@@ -73,45 +72,28 @@ public class PlayerFarmController : MonoBehaviour
     }
     private List<string> availableSeeds = new List<string>();
 
-    //public void AssignToSlot1()
-    //{
-    //    if (isSelectingSeedSlot && seedSlot1 != null)
-    //    {
-    //        string displayName = GetDisplayName(pendingSeedType);
-
-    //        // Convert "pumpkin_seed" -> "pumpkin" cho plantType
-    //        string plantType = pendingSeedType.Replace("_seed", "");
-
-    //        seedSlot1.SetSeed(plantType, pendingSeedQuantity, pendingSeedSprite, displayName);
-
-    //        // Trừ seed từ inventory
-    //        recyclableInventory.RemoveInventoryItem(pendingSeedType, pendingSeedQuantity);
-
-    //        CloseSeedSelection();
-    //    }
-    //}
     public void AssignToSlot1()
     {
-        Debug.Log($"🎯 AssignToSlot1 CALLED!");
+        Debug.Log($" AssignToSlot1 CALLED!");
         Debug.Log($"   isSelectingSeedSlot: {isSelectingSeedSlot}");
         Debug.Log($"   seedSlot1: {(seedSlot1 != null ? "EXISTS" : "NULL")}");
         Debug.Log($"   pendingSeedType: {pendingSeedType}");
 
         if (!isSelectingSeedSlot)
         {
-            Debug.LogWarning("⚠️ NOT in seed selection mode!");
+            Debug.LogWarning("NOT in seed selection mode!");
             return;
         }
 
         if (seedSlot1 == null)
         {
-            Debug.LogError("❌ seedSlot1 is NULL!");
+            Debug.LogError("seedSlot1 is NULL!");
             return;
         }
 
         if (isSelectingSeedSlot && seedSlot1 != null)
         {
-            Debug.Log($"✅ Proceeding with slot assignment...");
+            Debug.Log($"Proceeding with slot assignment...");
 
             string displayName = GetDisplayName(pendingSeedType);
             Debug.Log($"Display name: {displayName}");
@@ -120,17 +102,17 @@ public class PlayerFarmController : MonoBehaviour
             string plantType = pendingSeedType.Replace("_seed", "");
             Debug.Log($"Plant type for slot: {plantType}");
 
-            Debug.Log($"📞 Calling seedSlot1.SetSeed({plantType}, {pendingSeedQuantity})");
+            Debug.Log($"Calling seedSlot1.SetSeed({plantType}, {pendingSeedQuantity})");
             seedSlot1.SetSeed(plantType, pendingSeedQuantity, pendingSeedSprite, displayName);
 
-            Debug.Log($"📞 Removing item from inventory: {pendingSeedType} x{pendingSeedQuantity}");
+            Debug.Log($"Removing item from inventory: {pendingSeedType} x{pendingSeedQuantity}");
             // Trừ seed từ inventory
             recyclableInventory.RemoveInventoryItem(pendingSeedType, pendingSeedQuantity);
 
-            Debug.Log($"📞 Closing seed selection panel");
+            Debug.Log($"Closing seed selection panel");
             CloseSeedSelection();
 
-            Debug.Log($"✅ AssignToSlot1 COMPLETED!");
+            Debug.Log($"AssignToSlot1 COMPLETED!");
         }
     }
 
@@ -155,7 +137,7 @@ public class PlayerFarmController : MonoBehaviour
     }
     public void CancelSlotSelection()
     {
-        Debug.Log("🚫 Slot selection cancelled");
+        Debug.Log("Slot selection cancelled");
         CloseSeedSelection();
     }
     private void CloseSeedSelection()
@@ -180,33 +162,15 @@ public class PlayerFarmController : MonoBehaviour
         return itemName;
     }
 
-
-    //public void SelectPlantFromSlot(SeedSlot slot)
-    //{
-    //    if (slot != null && !string.IsNullOrEmpty(slot.plantType))
-    //    {
-    //        selectedPlantData = GetPlantData(slot.plantType);
-    //        currentSelectedSlot = slot;
-
-    //        slot.SetSelected(true);
-
-    //        // Deselect slot khác
-    //        var otherSlot = slot == seedSlot1 ? seedSlot2 : seedSlot1;
-    //        otherSlot?.SetSelected(false);
-
-    //        Debug.Log($"Selected plant from slot: {selectedPlantData.plantType}");
-    //    }
-    //}
-
     public void SelectPlantFromSlot(SeedSlot slot)
     {
-        Debug.Log($"🎯 SelectPlantFromSlot called");
+        Debug.Log($"SelectPlantFromSlot called");
         Debug.Log($"   slot: {slot != null}");
         Debug.Log($"   slot.plantType: '{slot?.plantType}'");
 
         if (slot != null && !string.IsNullOrEmpty(slot.plantType))
         {
-            Debug.Log($"✅ Valid slot selection");
+            Debug.Log($"Valid slot selection");
 
             selectedPlantData = GetPlantData(slot.plantType);
             Debug.Log($"   selectedPlantData: {selectedPlantData != null}");
@@ -214,22 +178,22 @@ public class PlayerFarmController : MonoBehaviour
             currentSelectedSlot = slot;
             Debug.Log($"   currentSelectedSlot set to: {slot.gameObject.name}");
 
-            Debug.Log($"📞 Calling slot.SetSelected(true)");
+            Debug.Log($"Calling slot.SetSelected(true)");
             slot.SetSelected(true);
 
             // Deselect slot khác
             var otherSlot = slot == seedSlot1 ? seedSlot2 : seedSlot1;
             if (otherSlot != null)
             {
-                Debug.Log($"📞 Deselecting other slot: {otherSlot.gameObject.name}");
+                Debug.Log($"Deselecting other slot: {otherSlot.gameObject.name}");
                 otherSlot.SetSelected(false);
             }
 
-            Debug.Log($"✅ Selected plant from slot: {selectedPlantData?.plantType}");
+            Debug.Log($"Selected plant from slot: {selectedPlantData?.plantType}");
         }
         else
         {
-            Debug.LogWarning($"⚠️ Invalid slot selection - slot: {slot != null}, plantType: '{slot?.plantType}'");
+            Debug.LogWarning($"Invalid slot selection - slot: {slot != null}, plantType: '{slot?.plantType}'");
         }
     }
     // Chon hat giong
@@ -244,21 +208,9 @@ public class PlayerFarmController : MonoBehaviour
         }
     }
 
-    //public void OnSeedSelected(string seedType, int quantity, Sprite seedSprite)
-    //{
-    //    pendingSeedType = seedType;
-    //    pendingSeedQuantity = quantity;
-    //    pendingSeedSprite = seedSprite;
-
-    //    if (seedSelectionPanel != null)
-    //    {
-    //        seedSelectionPanel.SetActive(true);
-    //        isSelectingSeedSlot = true;
-    //    }
-    //}
     public void OnSeedSelected(string seedType, int quantity, Sprite seedSprite)
     {
-        Debug.Log($"🎯 OnSeedSelected CALLED!");
+        Debug.Log($"OnSeedSelected CALLED!");
         Debug.Log($"   seedType: {seedType}");
         Debug.Log($"   quantity: {quantity}");
         Debug.Log($"   seedSprite: {(seedSprite != null ? seedSprite.name : "NULL")}");
@@ -269,7 +221,7 @@ public class PlayerFarmController : MonoBehaviour
 
         if (seedSelectionPanel != null)
         {
-            Debug.Log($"✅ SHOWING seedSelectionPanel");
+            Debug.Log($"SHOWING seedSelectionPanel");
             slotSelectionPanel.SetActive(true);
             isSelectingSeedSlot = true;
 
@@ -279,7 +231,7 @@ public class PlayerFarmController : MonoBehaviour
         }
         else
         {
-            Debug.LogError("❌ seedSelectionPanel is NULL! Check Inspector references!");
+            Debug.LogError("seedSelectionPanel is NULL! Check Inspector references!");
         }
     }
 
@@ -395,6 +347,11 @@ public class PlayerFarmController : MonoBehaviour
         isHoeing = true;
         player.PlayHoeAnimation(facing);
 
+        if (AudioManager.Instance != null)
+        {
+            AudioManager.Instance.PlayHoeSound();
+            Debug.Log("🔊 Playing hoe sound");
+        }
         yield return new WaitForSeconds(hoeDuration);
 
         tM_Grass.SetTile(pendingHoeCell, null);
@@ -445,7 +402,11 @@ public class PlayerFarmController : MonoBehaviour
 
         isWatering = true;
         player.PlayWaterAnimation(facing);
-
+        if (AudioManager.Instance != null)
+        {
+            AudioManager.Instance.PlayWaterSound();
+            Debug.Log("🔊 Playing water sound");
+        }
         yield return new WaitForSeconds(waterDuration);
 
         tM_Ground.SetTile(pendingHoeCell, null);
@@ -501,7 +462,11 @@ public class PlayerFarmController : MonoBehaviour
                 newPlant.plantTimeTicks = DateTime.UtcNow.Ticks;
                 newPlant.currentStage = 0;
                 newPlant.isWatered = false;
-
+                if (AudioManager.Instance != null)
+                {
+                    AudioManager.Instance.PlayPlantSound();
+                    Debug.Log("🔊 Playing Plant sound");
+                }
                 tileMapManager.AddPlant(newPlant);
                 UpdatePlantVisual(cellPos, newPlant);
 
@@ -548,8 +513,12 @@ public class PlayerFarmController : MonoBehaviour
 
                 tM_Ground.SetTile(cellPos, tB_Ground);
                 tM_Grass.SetTile(cellPos, tB_Grass);
-                
 
+                if (AudioManager.Instance != null)
+                {
+                    AudioManager.Instance.PlayHarvestSound();
+                    Debug.Log("🔊 Playing harvest sound");
+                }
                 tileMapManager.SetStateForTilemapDetail(cellPos.x, cellPos.y, TileMapState.Grass);
 
                 tileMapManager.allPlantedTiles.Remove(plant);
@@ -586,16 +555,16 @@ public class PlayerFarmController : MonoBehaviour
             if (LevelSystem.Instance.IsItemUnlocked(seed))
             {
                 availableSeeds.Add(seed);
-                Debug.Log($"✅ Available: {seed}");
+                Debug.Log($"Available: {seed}");
             }
             else
             {
                 int requiredLevel = LevelSystem.Instance.GetRequiredLevelForItem(seed);
-                Debug.Log($"🔒 Locked: {seed} (Cấp {requiredLevel})");
+                Debug.Log($"Locked: {seed} (Cấp {requiredLevel})");
             }
         }
 
-        Debug.Log($"📋 Total available seeds: {availableSeeds.Count}");
+        Debug.Log($"Total available seeds: {availableSeeds.Count}");
     }
 
     // ✅ THÊM: Getter

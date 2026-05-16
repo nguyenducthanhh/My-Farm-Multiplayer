@@ -35,62 +35,6 @@ public class SeedSlot : MonoBehaviour
         }
     }
 
-    //public void SetSeed(string seedType, int seedQuantity, Sprite seedSprite, string displayName)
-    //{
-    //    plantType = seedType;
-    //    quantity = seedQuantity;
-
-    //    if (seedImage != null)
-    //        seedImage.sprite = seedSprite;
-
-    //    if (seedNameText != null)
-    //        seedNameText.text = displayName;
-
-    //    if (quantityText != null)
-    //        quantityText.text = $"x{seedQuantity}";
-
-    //    if (slotButton != null)
-    //        slotButton.interactable = seedQuantity > 0;
-    //}
-    //public void SetSeed(string seedType, int seedQuantity, Sprite seedSprite, string displayName)
-    //{
-    //    // KIỂM TRA NẾU CÙNG LOẠI THỊ CỘNG DỒN
-    //    if (!string.IsNullOrEmpty(plantType) && plantType == seedType)
-    //    {
-    //        // Cùng loại seed - cộng dồn quantity
-    //        quantity += seedQuantity;
-    //        Debug.Log($"✅ Added {seedQuantity} to existing {seedType}. New quantity: {quantity}");
-    //    }
-    //    else
-    //    {
-    //        // Loại khác hoặc slot trống - ghi đè hoàn toàn
-    //        if (!string.IsNullOrEmpty(plantType) && plantType != seedType)
-    //        {
-    //            Debug.LogWarning($"⚠️ Replacing {plantType} with {seedType} in slot!");
-    //        }
-
-    //        plantType = seedType;
-    //        quantity = seedQuantity;
-
-    //        if (seedImage != null)
-    //            seedImage.sprite = seedSprite;
-
-    //        Debug.Log($"✅ Set new seed {seedType} with quantity: {quantity}");
-    //    }
-
-    //    // Cập nhật UI
-    //    if (seedNameText != null)
-    //        seedNameText.text = displayName;
-
-    //    if (quantityText != null)
-    //        quantityText.text = $"x{quantity}";
-
-    //    if (slotButton != null)
-    //        slotButton.interactable = quantity > 0;
-
-    //    // LƯU SLOT DATA LÊN FIREBASE
-    //    SaveSlotDataToFirebase();
-    //}
     public void SetSeed(string seedType, int seedQuantity, Sprite seedSprite, string displayName)
     {
         // KIỂM TRA NẾU CÙNG LOẠI THỊ CỘNG DỒN
@@ -98,14 +42,14 @@ public class SeedSlot : MonoBehaviour
         {
             // Cùng loại seed - cộng dồn quantity
             quantity += seedQuantity;
-            Debug.Log($"✅ Added {seedQuantity} to existing {seedType}. New quantity: {quantity}");
+            Debug.Log($"Added {seedQuantity} to existing {seedType}. New quantity: {quantity}");
         }
         else
         {
             // LOẠI KHÁC - TRẢ SEED CŨ VỀ INVENTORY TRƯỚC KHI THAY THẾ
             if (!string.IsNullOrEmpty(plantType) && quantity > 0)
             {
-                Debug.Log($"🔄 Returning {quantity}x {plantType} to inventory before replacing with {seedType}");
+                Debug.Log($"Returning {quantity}x {plantType} to inventory before replacing with {seedType}");
 
                 // TRẢ SEED CŨ VỀ INVENTORY
                 ReturnSeedToInventory();
@@ -118,7 +62,7 @@ public class SeedSlot : MonoBehaviour
             if (seedImage != null)
                 seedImage.sprite = seedSprite;
 
-            Debug.Log($"✅ Set new seed {seedType} with quantity: {quantity}");
+            Debug.Log($"Set new seed {seedType} with quantity: {quantity}");
         }
 
         // Cập nhật UI
@@ -163,7 +107,7 @@ public class SeedSlot : MonoBehaviour
         // THÊM VỀ INVENTORY
         farmController.recyclableInventory.AddInventoryItem(returnSeed);
 
-        Debug.Log($"✅ Returned {quantity}x {seedItemName} to inventory");
+        Debug.Log($"Returned {quantity}x {seedItemName} to inventory");
     }
     private void SaveSlotDataToFirebase()
     {
@@ -192,11 +136,11 @@ public class SeedSlot : MonoBehaviour
             {
                 if (task.IsCompleted)
                 {
-                    Debug.Log($"✅ {slotId} saved to Firebase: {plantType} x{quantity}");
+                    Debug.Log($"{slotId} saved to Firebase: {plantType} x{quantity}");
                 }
                 else
                 {
-                    Debug.LogError($"❌ Failed to save {slotId}: {task.Exception}");
+                    Debug.LogError($"Failed to save {slotId}: {task.Exception}");
                 }
             });
     }
@@ -230,7 +174,7 @@ public class SeedSlot : MonoBehaviour
 
                             UpdateSlotVisual();
 
-                            Debug.Log($"✅ {slotId} loaded: {plantType} x{quantity}");
+                            Debug.Log($"{slotId} loaded: {plantType} x{quantity}");
                         }
                         else
                         {

@@ -1,0 +1,46 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 13b75c95f34a00d4e8c04f76b73312e6, type: 3}
+  m_Name: Kapybara1
+  m_EditorClassIdentifier: 
+  m_AnimatedSprites:
+  - {fileID: 1048385161, guid: 858bb46122571a444b1179fa87ecaf69, type: 3}
+  - {fileID: 648945425, guid: 858bb46122571a444b1179fa87ecaf69, type: 3}
+  - {fileID: -970065537, guid: 858bb46122571a444b1179fa87ecaf69, type: 3}
+  - {fileID: -924766334, guid: 858bb46122571a444b1179fa87ecaf69, type: 3}
+  - {fileID: 30419545, guid: 858bb46122571a444b1179fa87ecaf69, type: 3}
+  - {fileID: -321793321, guid: 858bb46122571a444b1179fa87ecaf69, type: 3}
+  - {fileID: 1817296414, guid: 858bb46122571a444b1179fa87ecaf69, type: 3}
+  - {fileID: -1059877115, guid: 858bb46122571a444b1179fa87ecaf69, type: 3}
+  - {fileID: 1422804179, guid: 858bb46122571a444b1179fa87ecaf69, type: 3}
+  - {fileID: -524687737, guid: 858bb46122571a444b1179fa87ecaf69, type: 3}
+  - {fileID: -1258971616, guid: 858bb46122571a444b1179fa87ecaf69, type: 3}
+  - {fileID: 1269339990, guid: 858bb46122571a444b1179fa87ecaf69, type: 3}
+  - {fileID: 1149162975, guid: 858bb46122571a444b1179fa87ecaf69, type: 3}
+  - {fileID: -1115384571, guid: 858bb46122571a444b1179fa87ecaf69, type: 3}
+  - {fileID: 250790665, guid: 858bb46122571a444b1179fa87ecaf69, type: 3}
+  - {fileID: -1105439391, guid: 858bb46122571a444b1179fa87ecaf69, type: 3}
+  - {fileID: 2057231754, guid: 858bb46122571a444b1179fa87ecaf69, type: 3}
+  - {fileID: -1149518700, guid: 858bb46122571a444b1179fa87ecaf69, type: 3}
+  - {fileID: -1897856210, guid: 858bb46122571a444b1179fa87ecaf69, type: 3}
+  - {fileID: -962590706, guid: 858bb46122571a444b1179fa87ecaf69, type: 3}
+  - {fileID: 1769150812, guid: 858bb46122571a444b1179fa87ecaf69, type: 3}
+  - {fileID: -1686581388, guid: 858bb46122571a444b1179fa87ecaf69, type: 3}
+  - {fileID: 1360618218, guid: 858bb46122571a444b1179fa87ecaf69, type: 3}
+  - {fileID: -483146974, guid: 858bb46122571a444b1179fa87ecaf69, type: 3}
+  - {fileID: 2010503699, guid: 858bb46122571a444b1179fa87ecaf69, type: 3}
+  m_MinSpeed: 10
+  m_MaxSpeed: 10
+  m_AnimationStartTime: 0
+  m_AnimationStartFrame: 0
+  m_TileColliderType: 0
+  m_TileAnimationFlags: 0

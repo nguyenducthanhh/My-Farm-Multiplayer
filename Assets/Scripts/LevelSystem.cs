@@ -7,15 +7,12 @@ using UnityEngine;
 
 public class LevelSystem : MonoBehaviour
 {
-    [SerializeField] private LevelConfig levelConfig;  // ← THÊM: Asset config
-    //[SerializeField] private int experiencePerHarvest = 10;
-    //[SerializeField] private int experiencePerFish = 15;
-    //[SerializeField] private int experiencePerAnimalProduct = 20;
+    [SerializeField] private LevelConfig levelConfig;
 
     private static LevelSystem instance;
     private int currentLevel = 1;
     private int currentExperience = 0;
-    private int experienceToNextLevel = 100;
+    private int experienceToNextLevel;
     private List<string> unlockedItems = new List<string>();
 
     [System.Serializable]
@@ -36,7 +33,10 @@ public class LevelSystem : MonoBehaviour
             return instance;
         }
     }
-
+    public LevelConfig LevelConfigData
+    {
+        get { return levelConfig; }
+    }
     private void Start()
     {
         if (instance == null)
@@ -46,7 +46,12 @@ public class LevelSystem : MonoBehaviour
 
         if (levelConfig == null)
             Debug.LogError("❌ LevelConfig not assigned!");
-
+        else
+        {
+            // ✅ THÊM: Khởi tạo experienceToNextLevel đúng từ LevelConfig
+            experienceToNextLevel = GetExperienceForLevel(currentLevel + 1);
+            Debug.Log($"✅ Initialized experienceToNextLevel: {experienceToNextLevel}");
+        }
         LoadLevelDataFromFirebase();
 
     }
@@ -77,12 +82,34 @@ public class LevelSystem : MonoBehaviour
         CheckUnlockedItems();
     }
 
+    //private void CheckUnlockedItems()
+    //{
+    //    if (levelConfig == null) return;
+
+    //    foreach (var unlock in levelConfig.levelUnlocks)
+    //    {
+    //        if (currentLevel >= unlock.requiredLevel && !unlockedItems.Contains(unlock.unlockedItemName))
+    //        {
+    //            unlockedItems.Add(unlock.unlockedItemName);
+    //            Debug.Log($"🔓 UNLOCK: {unlock.unlockedItemDescription} (Cấp {unlock.requiredLevel})");
+
+    //            // ✅ Broadcast unlock event
+    //            OnItemUnlocked?.Invoke(unlock);
+    //        }
+    //    }
+
+    //    SaveLevelDataToFirebase();
+    //}
     private void CheckUnlockedItems()
     {
         if (levelConfig == null) return;
 
+        Debug.Log($"🔍 Checking unlocks - Current Level: {currentLevel}, Unlocked Items: {string.Join(", ", unlockedItems)}");
+
         foreach (var unlock in levelConfig.levelUnlocks)
         {
+            Debug.Log($"   ├─ Checking {unlock.unlockedItemName}: Level {unlock.requiredLevel}, Current: {currentLevel}");
+
             if (currentLevel >= unlock.requiredLevel && !unlockedItems.Contains(unlock.unlockedItemName))
             {
                 unlockedItems.Add(unlock.unlockedItemName);
@@ -127,11 +154,14 @@ public class LevelSystem : MonoBehaviour
         return threshold != null ? threshold.experienceRequired : 100 + (level * 50);
     }
 
+    // ✅ THÊM: Getter cho LevelData (để save)
+
+
     public int GetCurrentLevel() => currentLevel;
     public int GetCurrentExperience() => currentExperience;
     public int GetExperienceToNextLevel() => experienceToNextLevel;
     public float GetExperienceProgress() => (float)currentExperience / experienceToNextLevel;
-
+    public List<string> GetUnlockedItems() => unlockedItems;
     private void LoadLevelDataFromFirebase()
     {
         if (LoadDataManager.firebaseUser == null) return;

@@ -169,7 +169,7 @@ public class NpcChefController : MonoBehaviour
     {
         if (goldDisplayText != null && LoadDataManager.userInGame != null)
         {
-            goldDisplayText.text = $"Gold: {LoadDataManager.userInGame.Gold}";
+            goldDisplayText.text = $"Vàng: {LoadDataManager.userInGame.Gold}";
         }
     }
 

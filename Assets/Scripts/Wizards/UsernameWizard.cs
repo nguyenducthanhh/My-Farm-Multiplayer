@@ -66,7 +66,8 @@ public class UsernameWizard : MonoBehaviour
 
 
     [SerializeField] private FirebaseDatabaseManager databaseManager;
-    public Text username;
+    public Text usernameProfile;
+    public Text usernameDisplay;
     public Text gold;
 
     public static bool IsEnteringUsername { get; private set; } = false;
@@ -115,30 +116,43 @@ public class UsernameWizard : MonoBehaviour
             return;
         }
 
-        if (string.IsNullOrEmpty(LoadDataManager.userInGame.Name))
+        string currentName = LoadDataManager.userInGame.Name;
+
+        // ✅ DEBUG: Log để check tên hiện tại
+        Debug.Log($"🔍 SetupUI - Current Name: '{currentName}' - Length: {currentName?.Length}");
+
+        // ✅ SỬA: Kiểm tra Name có phải rỗng hoặc tên mặc định không
+        // Nếu Name rỗng hoặc bắt đầu với "Player_" → hiển thị wizard
+        bool needsUsername = string.IsNullOrEmpty(currentName) ||
+                            currentName.StartsWith("Player_");
+
+        if (needsUsername)
         {
+            // ✅ Hiển thị bảng nhập tên
+            Debug.Log("📝 Showing username wizard - name is empty or default");
+
             usernameWizard.SetActive(true);
             storageBox.SetActive(false);
             seedSlot.SetActive(false);
 
             IsEnteringUsername = true;
-
-            //if (inputUsername != null)
-            //{
-            //    inputUsername.onSelect.AddListener(OnUsernameInputFocused);
-            //    inputUsername.onDeselect.AddListener(OnUsernameInputUnfocused);
-            //}
         }
         else
         {
+            // ✅ Ẩn bảng nhập tên - user đã có tên thực
+            Debug.Log($"✅ Username already set: '{currentName}'");
+
             usernameWizard.SetActive(false);
+            storageBox.SetActive(true);
+            seedSlot.SetActive(true);
             IsEnteringUsername = false;
-            if (username != null)
-                username.text = LoadDataManager.userInGame.Name;
+
+            if (usernameProfile != null)
+                usernameProfile.text = currentName;
+            if (usernameDisplay != null)
+                usernameDisplay.text = currentName;
         }
 
-        //if (gold != null)
-        //    gold.text = "Gold: " + LoadDataManager.userInGame.Gold.ToString();
         RefreshGold();
 
         if (buttonOk != null)
@@ -153,7 +167,7 @@ public class UsernameWizard : MonoBehaviour
     {
         if (gold != null && LoadDataManager.userInGame != null)
         {
-            gold.text = "Gold: " + LoadDataManager.userInGame.Gold.ToString();
+            gold.text = LoadDataManager.userInGame.Gold.ToString();
         }
     }
     //private void OnUsernameInputUnfocused(string value)
@@ -189,45 +203,50 @@ public class UsernameWizard : MonoBehaviour
     {
         if (LoadDataManager.userInGame == null)
         {
-            Debug.LogError("Cannot set username - user data is null!");
+            Debug.LogError("❌ Cannot set username - user data is null!");
             return;
         }
 
         if (inputUsername == null || string.IsNullOrEmpty(inputUsername.text))
         {
-            Debug.LogWarning("Username input is empty!");
+            Debug.LogWarning("⚠️ Username input is empty!");
             return;
         }
 
-        LoadDataManager.userInGame.Name = inputUsername.text;
+        string newUsername = inputUsername.text;
+        LoadDataManager.userInGame.Name = newUsername;
 
-        // ✅ CHỈ CẬP NHẬT NAME FIELD, KHÔNG GHI ĐÈ TOÀN BỘ USER
+        Debug.Log($"💾 Saving username to Firebase: '{newUsername}'");
+
+        // ✅ Save lên Firebase
         FirebaseDatabase.DefaultInstance
             .GetReference("Users")
             .Child(LoadDataManager.firebaseUser.UserId)
-            .Child("Name")  // ← CHỈ CẬP NHẬT FIELD NAME
-            .SetValueAsync(inputUsername.text)
+            .Child("Name")
+            .SetValueAsync(newUsername)
             .ContinueWithOnMainThread(task =>
             {
-                if (task.IsCompleted)
+                if (task.IsCompleted && !task.IsFaulted)
                 {
-                    Debug.Log($"✅ Username saved successfully: '{inputUsername.text}'");
+                    Debug.Log($"✅ Username saved successfully: '{newUsername}'");
+
+                    // Update UI
+                    if (usernameProfile != null)
+                        usernameProfile.text = newUsername;
+                    if (usernameDisplay != null)
+                        usernameDisplay.text = newUsername;
+
+                    usernameWizard.SetActive(false);
+                    storageBox.SetActive(true);
+                    seedSlot.SetActive(true);
+
+                    IsEnteringUsername = false;
+                    Debug.Log("✅ Username setup completed");
                 }
                 else
                 {
-                    Debug.LogError("❌ Failed to save username: " + task.Exception);
+                    Debug.LogError($"❌ Failed to save username: {task.Exception?.Message}");
                 }
             });
-
-        // Update UI
-        if (username != null)
-            username.text = inputUsername.text;
-
-        usernameWizard.SetActive(false);
-        storageBox.SetActive(true);
-        seedSlot.SetActive(true);
-
-        IsEnteringUsername = false;
-        Debug.Log("✅ Username setup completed - farm actions enabled");
     }
 }

@@ -206,7 +206,7 @@ public class LoadDataManager : MonoBehaviour
     {
         var userRef = reference.Child("Users").Child(firebaseUser.UserId);
         int loadedPartsCount = 0;
-        int totalParts = 4; // Name, Gold, MapInGame, Inventory
+        int totalParts = 5; // Name, Gold, MapInGame, Inventory
 
         // Load Name
         userRef.Child("Name").GetValueAsync().ContinueWithOnMainThread(task =>
@@ -238,6 +238,32 @@ public class LoadDataManager : MonoBehaviour
             {
                 userInGame.Gold = 100;
                 Debug.Log("⚠️ Gold not found, using default 100");
+            }
+
+            loadedPartsCount++;
+            CheckLoadComplete(loadedPartsCount, totalParts);
+        });
+        // ✅ THÊM: Load LastPosition
+        userRef.Child("LastPosition").GetValueAsync().ContinueWithOnMainThread(task =>
+        {
+            if (task.IsCompleted && task.Result.Value != null)
+            {
+                try
+                {
+                    string posJson = task.Result.GetRawJsonValue();
+                    userInGame.LastPosition = JsonConvert.DeserializeObject<User.PlayerPosition>(posJson);
+                    Debug.Log($"✅ LastPosition loaded: ({userInGame.LastPosition.x}, {userInGame.LastPosition.y}, {userInGame.LastPosition.z})");
+                }
+                catch (Exception e)
+                {
+                    Debug.LogError($"❌ Error parsing LastPosition: {e.Message}");
+                    userInGame.LastPosition = new User.PlayerPosition { x = 0, y = 0, z = 0 };
+                }
+            }
+            else
+            {
+                Debug.Log("⚠️ LastPosition not found, using default (0,0,0)");
+                userInGame.LastPosition = new User.PlayerPosition { x = 0, y = 0, z = 0 };
             }
 
             loadedPartsCount++;
@@ -318,6 +344,32 @@ public class LoadDataManager : MonoBehaviour
                     // Fix inventory trên Firebase
                     FixInventoryOnFirebase();
                 }
+                // ✅ THÊM: Load LastPosition
+                userRef.Child("LastPosition").GetValueAsync().ContinueWithOnMainThread(task =>
+                {
+                    if (task.IsCompleted && task.Result.Value != null)
+                    {
+                        try
+                        {
+                            string positionJson = task.Result.GetRawJsonValue();
+                            userInGame.LastPosition = JsonConvert.DeserializeObject<User.PlayerPosition>(positionJson);
+                            Debug.Log($"✅ Position loaded: ({userInGame.LastPosition.x}, {userInGame.LastPosition.y})");
+                        }
+                        catch (Exception e)
+                        {
+                            Debug.LogError($"❌ Error parsing LastPosition: {e.Message}");
+                            userInGame.LastPosition = new User.PlayerPosition { x = 0, y = 0, z = 0 };
+                        }
+                    }
+                    else
+                    {
+                        Debug.Log("⚠️ LastPosition not found, using default (0, 0)");
+                        userInGame.LastPosition = new User.PlayerPosition { x = 0, y = 0, z = 0 };
+                    }
+
+                    loadedPartsCount++;
+                    CheckLoadComplete(loadedPartsCount, totalParts);
+                });
             }
             else
             {

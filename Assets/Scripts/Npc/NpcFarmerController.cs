@@ -98,15 +98,15 @@ public class NpcFarmerController : MonoBehaviour
     }
     private void ShowLockedMessage(string message)
     {
-        Debug.Log($"🔒 {message}");
+        Debug.Log($" {message}");
         // ✅ TODO: Hiển thị thông báo UI
     }
 
     public void PurchaseSeed(SeedShopItem seedItem)
     {
-        Debug.Log($"🔍 Current Level: {LevelSystem.Instance.GetCurrentLevel()}");
-        Debug.Log($"🔍 Seed Name: {seedItem.seedData.itemName}");
-        Debug.Log($"🔍 Is Unlocked: {LevelSystem.Instance.IsItemUnlocked(seedItem.seedData.itemName)}");
+        Debug.Log($" Current Level: {LevelSystem.Instance.GetCurrentLevel()}");
+        Debug.Log($" Seed Name: {seedItem.seedData.itemName}");
+        Debug.Log($" Is Unlocked: {LevelSystem.Instance.IsItemUnlocked(seedItem.seedData.itemName)}");
 
         // ✅ THÊM: Kiểm tra đã mở khóa chưa
         string seedUnlockName = seedItem.seedData.itemName;  // "paddy", "grape", "corn", etc.
@@ -114,7 +114,7 @@ public class NpcFarmerController : MonoBehaviour
         if (!LevelSystem.Instance.IsItemUnlocked(seedUnlockName))
         {
             int requiredLevel = LevelSystem.Instance.GetRequiredLevelForItem(seedUnlockName);
-            Debug.Log($"🔒 Cần đạt cấp {requiredLevel} để mở khóa {seedItem.seedData.description}!");
+            Debug.Log($" Cần đạt cấp {requiredLevel} để mở khóa {seedItem.seedData.description}!");
 
             // ✅ Hiển thị thông báo UI (optional)
             ShowLockedMessage($"Mở khóa tại cấp {requiredLevel}");
@@ -185,7 +185,7 @@ public class NpcFarmerController : MonoBehaviour
     {
         if (playerGoldText != null && LoadDataManager.userInGame != null)
         {
-            playerGoldText.text = $"Gold: {LoadDataManager.userInGame.Gold}";
+            playerGoldText.text = $"Vàng: {LoadDataManager.userInGame.Gold}";
         }
     }
 

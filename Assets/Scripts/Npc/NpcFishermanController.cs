@@ -41,6 +41,7 @@ public class NpcFishermanController : MonoBehaviour
     {
         public string fishType; // "salmon_fish", "tuna_fish", etc.
         public int sellPrice;
+        public int experienceReward;
     }
 
     [Header("Fish Sell Data")]
@@ -170,9 +171,17 @@ public class NpcFishermanController : MonoBehaviour
         // Tính tiền
         int totalPrice = fishData.sellPrice * quantity;
 
+        int totalExperience = fishData.experienceReward * quantity;
+
+
         // Cộng gold
         LoadDataManager.userInGame.Gold += totalPrice;
 
+        if (LevelSystem.Instance != null)
+        {
+            LevelSystem.Instance.AddExperience(totalExperience);
+            Debug.Log($"✅ +{totalExperience} Exp từ bán cá");
+        }
         // Trừ cá khỏi inventory
         playerInventory.RemoveInventoryItem(fishData.fishType, quantity);
 
@@ -235,7 +244,7 @@ public class NpcFishermanController : MonoBehaviour
     {
         if (playerGoldText != null && LoadDataManager.userInGame != null)
         {
-            playerGoldText.text = $"Gold: {LoadDataManager.userInGame.Gold}";
+            playerGoldText.text = $"Vàng: {LoadDataManager.userInGame.Gold}";
         }
     }
 }

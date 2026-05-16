@@ -16,19 +16,55 @@ MonoBehaviour:
   - level: 1
     experienceRequired: 0
   - level: 2
-    experienceRequired: 10
-  - level: 3
     experienceRequired: 30
+  - level: 3
+    experienceRequired: 70
   - level: 4
-    experienceRequired: 60
-  - level: 5
     experienceRequired: 100
+  - level: 5
+    experienceRequired: 120
+  - level: 6
+    experienceRequired: 140
+  - level: 7
+    experienceRequired: 160
+  - level: 8
+    experienceRequired: 180
+  - level: 9
+    experienceRequired: 200
+  - level: 10
+    experienceRequired: 220
+  - level: 11
+    experienceRequired: 240
   levelUnlocks:
-  - requiredLevel: 3
-    unlockedItemName: Grape
-    unlockedItemDescription: "H\u1EA1t gi\u1ED1ng nho"
-    unlockType: 0
   - requiredLevel: 1
     unlockedItemName: Paddy
     unlockedItemDescription: "H\u1EA1t gi\u1ED1ng L\xFAa"
     unlockType: 0
+  - requiredLevel: 3
+    unlockedItemName: Grape
+    unlockedItemDescription: "H\u1EA1t gi\u1ED1ng nho"
+    unlockType: 0
+  - requiredLevel: 5
+    unlockedItemName: Corn
+    unlockedItemDescription: "H\u1EA1t gi\u1ED1ng ng\xF4"
+    unlockType: 0
+  - requiredLevel: 1
+    unlockedItemName: chicken_pen_1
+    unlockedItemDescription: "Chu\u1ED3ng g\xE0"
+    unlockType: 1
+  - requiredLevel: 2
+    unlockedItemName: pig_pen_1
+    unlockedItemDescription: "Chu\u1ED3ng l\u1EE3n"
+    unlockType: 1
+  - requiredLevel: 7
+    unlockedItemName: Carrot
+    unlockedItemDescription: "H\u1EA1t gi\u1ED1ng c\xE0 r\u1ED1t"
+    unlockType: 0
+  - requiredLevel: 9
+    unlockedItemName: Strawberry
+    unlockedItemDescription: "H\u1EA1t gi\u1ED1ng d\xE2u"
+    unlockType: 0
+  - requiredLevel: 3
+    unlockedItemName: cow_pen_1
+    unlockedItemDescription: "Chu\u1ED3ng b\xF2"
+    unlockType: 1

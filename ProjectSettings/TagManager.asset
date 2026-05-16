@@ -11,7 +11,7 @@ TagManager:
   - 
   - Water
   - UI
-  - 
+  - Preview
   - 
   - 
   - 
@@ -40,6 +40,9 @@ TagManager:
   m_SortingLayers:
   - name: Default
     uniqueID: 0
+    locked: 0
+  - name: Animal
+    uniqueID: 2573740305
     locked: 0
   - name: Ground_Wet
     uniqueID: 4186070699
@@ -76,9 +79,6 @@ TagManager:
     locked: 0
   - name: Npc
     uniqueID: 1696032173
-    locked: 0
-  - name: Animal
-    uniqueID: 2573740305
     locked: 0
   - name: Food
     uniqueID: 2463642927
