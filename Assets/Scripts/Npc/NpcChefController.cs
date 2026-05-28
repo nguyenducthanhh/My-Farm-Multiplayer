@@ -60,7 +60,7 @@ public class NpcChefController : MonoBehaviour
         public string chefId;
         public List<CookingSlotData> cookingSlots = new List<CookingSlotData>();
     }
-
+    
     [System.Serializable]
     public class CookingSlotData
     {

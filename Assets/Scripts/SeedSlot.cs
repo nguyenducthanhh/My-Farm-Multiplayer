@@ -111,9 +111,9 @@ public class SeedSlot : MonoBehaviour
     }
     private void SaveSlotDataToFirebase()
     {
-        if (LoadDataManager.firebaseUser == null)
+        if (LoadDataManager.firebaseUser == null || !LoadDataManager.IsUserDataLoaded || !LoadDataManager.HasUserRecord)
         {
-            Debug.LogError("Firebase user is null!");
+            Debug.LogError("User data is not validly loaded. Seed slot will not be saved.");
             return;
         }
 
@@ -146,9 +146,9 @@ public class SeedSlot : MonoBehaviour
     }
     public void LoadSlotDataFromFirebase()
     {
-        if (LoadDataManager.firebaseUser == null)
+        if (LoadDataManager.firebaseUser == null || !LoadDataManager.IsUserDataLoaded || !LoadDataManager.HasUserRecord)
         {
-            Debug.LogError("Firebase user is null!");
+            Debug.LogError("User data is not validly loaded. Seed slot will not be loaded.");
             return;
         }
 
@@ -178,19 +178,19 @@ public class SeedSlot : MonoBehaviour
                         }
                         else
                         {
-                            ClearSlot();
+                            ClearSlot(false);
                         }
                     }
                     catch (System.Exception e)
                     {
                         Debug.LogError($"Error loading {slotId}: {e.Message}");
-                        ClearSlot();
+                        ClearSlot(false);
                     }
                 }
                 else
                 {
                     Debug.Log($"{slotId} not found in Firebase - clearing slot");
-                    ClearSlot();
+                    ClearSlot(false);
                 }
             });
     }
@@ -198,7 +198,7 @@ public class SeedSlot : MonoBehaviour
     {
         if (string.IsNullOrEmpty(plantType) || quantity <= 0)
         {
-            ClearSlot();
+            ClearSlot(false);
             return;
         }
 
@@ -222,27 +222,8 @@ public class SeedSlot : MonoBehaviour
         if (slotButton != null)
             slotButton.interactable = quantity > 0;
     }
-    //public void ClearSlot()
-    //{
-    //    plantType = "";
-    //    quantity = 0;
 
-    //    if (seedImage != null)
-    //        seedImage.sprite = null;
-
-    //    if (seedNameText != null)
-    //        seedNameText.text = "Empty";
-
-    //    if (quantityText != null)
-    //        quantityText.text = "";
-
-    //    if (slotButton != null)
-    //        slotButton.interactable = false;
-
-    //    SetSelected(false);
-    //}
-
-    public void ClearSlot()
+    public void ClearSlot(bool saveToFirebase = true)
     {
         plantType = "";
         quantity = 0;
@@ -260,9 +241,15 @@ public class SeedSlot : MonoBehaviour
             slotButton.interactable = false;
 
         SetSelected(false);
-
+        if (farmController != null && farmController.currentSelectedSlot == this)
+        {
+            Debug.Log($"🔄 Clearing selected slot {slotId}");
+            farmController.currentSelectedSlot = null;
+            farmController.selectedPlantData = null;
+        }
         // LƯU SAU KHI CLEAR
-        SaveSlotDataToFirebase();
+        if (saveToFirebase)
+            SaveSlotDataToFirebase();
     }
 
 
@@ -280,7 +267,7 @@ public class SeedSlot : MonoBehaviour
         if (selectionBorder != null)
         {
             selectionBorder.SetActive(isSelected);
-            Debug.Log($"✅ SelectionBorder set to: {isSelected}");
+            Debug.Log(message: $"✅ SelectionBorder set to: {isSelected}");
         }
         else
         {
@@ -316,24 +303,6 @@ public class SeedSlot : MonoBehaviour
         return !string.IsNullOrEmpty(plantType) && quantity > 0;
     }
 
-    //public void UseSeed()
-    //{
-    //    if (quantity > 0)
-    //    {
-    //        quantity--;
-
-    //        if (quantityText != null)
-    //            quantityText.text = quantity > 0 ? $"x{quantity}" : "";
-
-    //        if (slotButton != null)
-    //            slotButton.interactable = quantity > 0;
-
-    //        if (quantity <= 0)
-    //        {
-    //            ClearSlot();
-    //        }
-    //    }
-    //}
     public void UseSeed()
     {
         if (quantity > 0)

@@ -2,6 +2,7 @@
 using Firebase.Extensions;
 using Newtonsoft.Json;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
@@ -37,6 +38,11 @@ public class LeaderboardManager : MonoBehaviour
     private List<Transform> levelDisplayedEntries = new List<Transform>();
     private List<Transform> questDisplayedEntries = new List<Transform>();
     private bool isLevelLeaderboardActive = true;
+    private bool isRefreshingLeaderboard = false;
+
+    // ✅ Cache leaderboard data
+    private List<LeaderboardEntry> cachedLevelLeaderboard = new List<LeaderboardEntry>();
+    private List<LeaderboardEntry> cachedQuestLeaderboard = new List<LeaderboardEntry>();
 
     [System.Serializable]
     public class LeaderboardEntry
@@ -45,7 +51,6 @@ public class LeaderboardManager : MonoBehaviour
         public string playerName;
         public int value;
         public int rank;
-
         public LeaderboardEntry(string playerId, string playerName, int value, int rank)
         {
             this.playerId = playerId;
@@ -53,6 +58,24 @@ public class LeaderboardManager : MonoBehaviour
             this.value = value;
             this.rank = rank;
         }
+    }
+
+    [System.Serializable]
+    public class LeaderboardSnapshot
+    {
+        public string snapshotDate;
+        public string timestamp;
+        public Dictionary<string, LeaderboardRankEntry> levelRanking = new Dictionary<string, LeaderboardRankEntry>();
+        public Dictionary<string, LeaderboardRankEntry> questRanking = new Dictionary<string, LeaderboardRankEntry>();
+    }
+
+    [System.Serializable]
+    public class LeaderboardRankEntry
+    {
+        public int rank;
+        public string playerName;
+        public int value;
+        public string timestamp;
     }
 
     public static LeaderboardManager Instance
@@ -85,19 +108,21 @@ public class LeaderboardManager : MonoBehaviour
         if (leaderboardPanel != null)
             leaderboardPanel.SetActive(false);
 
-        // ✅ Tạo sẵn 10 entry UI cho bảng cấp độ
+        // ✅ Tạo sẵn entry UI
         for (int i = 0; i < maxLeaderboardEntries; i++)
         {
             var entry = Instantiate(leaderboardEntryPrefab, levelContentTransform);
             levelDisplayedEntries.Add(entry);
         }
 
-        // ✅ Tạo sẵn 10 entry UI cho bảng nhiệm vụ
         for (int i = 0; i < maxLeaderboardEntries; i++)
         {
             var entry = Instantiate(leaderboardEntryPrefab, questContentTransform);
             questDisplayedEntries.Add(entry);
         }
+
+        // ✅ Auto-load leaderboard từ Firebase khi game start
+        StartCoroutine(LoadAndCacheLeaderboardFromFirebase());
     }
 
     public void OpenLeaderboard()
@@ -106,20 +131,14 @@ public class LeaderboardManager : MonoBehaviour
             leaderboardPanel.SetActive(true);
 
         ShowLevelLeaderboard();
+        StartCoroutine(RefreshLeaderboardFromUsers());
     }
-    private bool hasLoadedLeaderboard = false;
 
     public void CloseLeaderboard()
     {
         if (leaderboardPanel != null)
             leaderboardPanel.SetActive(false);
-
-        // ✅ THÊM: Reset flag khi đóng bảng
-        hasLoadedLeaderboard = false;
-        Debug.Log("🔄 Leaderboard closed - flag reset");
     }
-
-    // ✅ THÊM: Flag để track lần đầu mở bảng
 
     private void ShowLevelLeaderboard()
     {
@@ -135,17 +154,12 @@ public class LeaderboardManager : MonoBehaviour
         if (questLeaderboardContent != null)
             questLeaderboardContent.SetActive(false);
 
-        // ✅ SỬA: Reset scroll khi chuyển sang tab Level
         if (levelScrollRect != null)
-        {
             levelScrollRect.verticalNormalizedPosition = 1f;
-            Debug.Log("🔼 Reset level scroll to top");
-        }
 
-        LoadAndDisplayLevelLeaderboard();
+        DisplayLevelLeaderboard(cachedLevelLeaderboard);
     }
 
-    // ✅ Hiển thị bảng xếp hạng nhiệm vụ
     private void ShowQuestLeaderboard()
     {
         if (isLevelLeaderboardActive == false) return;
@@ -162,218 +176,310 @@ public class LeaderboardManager : MonoBehaviour
         if (questLeaderboardContent != null)
             questLeaderboardContent.SetActive(true);
 
-        // ✅ SỬA: Reset scroll khi chuyển sang tab Quest
         if (questScrollRect != null)
-        {
             questScrollRect.verticalNormalizedPosition = 1f;
-            Debug.Log("🔼 Reset quest scroll to top");
+
+        DisplayQuestLeaderboard(cachedQuestLeaderboard);
+    }
+
+    /// <summary>
+    /// ✅ THÊM: Load leaderboard từ Firebase
+    /// </summary>
+    private IEnumerator LoadAndCacheLeaderboardFromFirebase()
+    {
+        string today = System.DateTime.UtcNow.ToString("yyyy-MM-dd");
+
+        Debug.Log($"📥 Loading leaderboard from Firebase for {today}...");
+
+        // Load Level Leaderboard
+        yield return StartCoroutine(LoadLeaderboardFromFirebase(today, "levelRanking",
+            (entries) => cachedLevelLeaderboard = entries));
+
+        // Load Quest Leaderboard
+        yield return StartCoroutine(LoadLeaderboardFromFirebase(today, "questRanking",
+            (entries) => cachedQuestLeaderboard = entries));
+
+        Debug.Log($"✅ Leaderboard cached successfully!");
+    }
+
+    /// <summary>
+    /// ✅ THÊM: Load từng loại leaderboard từ Firebase
+    /// </summary>
+    private IEnumerator LoadLeaderboardFromFirebase(string date, string rankType, System.Action<List<LeaderboardEntry>> callback)
+    {
+        bool isLoaded = false;
+        List<LeaderboardEntry> entries = new List<LeaderboardEntry>();
+
+        FirebaseDatabase.DefaultInstance
+            .GetReference("Leaderboard/CurrentDaily")
+            .Child(date)
+            .Child(rankType)
+            .GetValueAsync()
+            .ContinueWithOnMainThread(task =>
+            {
+                if (task.IsCompleted && task.Result.Value != null)
+                {
+                    try
+                    {
+                        var snapshotData = JsonConvert.DeserializeObject<Dictionary<string, LeaderboardRankEntry>>(
+                            task.Result.GetRawJsonValue()
+                        );
+
+                        // Parse data từ snapshot
+                        foreach (var kvp in snapshotData)
+                        {
+                            string playerId = kvp.Key;
+                            var rankEntry = kvp.Value;
+
+                            var entry = new LeaderboardEntry(
+                                playerId,
+                                rankEntry.playerName,
+                                rankEntry.value,
+                                rankEntry.rank > 0 ? rankEntry.rank : 0
+                            );
+                            entries.Add(entry);
+                        }
+
+                        // Sort theo điểm thực tế rồi tự tính lại rank để tránh dữ liệu rank cũ/-1 trên Firebase.
+                        entries = entries
+                            .OrderByDescending(e => e.value)
+                            .ThenBy(e => e.playerName)
+                            .Take(maxLeaderboardEntries)
+                            .ToList();
+
+                        for (int i = 0; i < entries.Count; i++)
+                        {
+                            entries[i].rank = i + 1;
+                        }
+
+                        Debug.Log($"✅ {rankType} loaded from Firebase: {entries.Count} entries");
+                    }
+                    catch (Exception e)
+                    {
+                        Debug.LogError($"❌ Error parsing {rankType}: {e.Message}");
+                    }
+                }
+                else
+                {
+                    Debug.LogWarning($"⚠️ No {rankType} found in Firebase for {date}, will load from users...");
+                    // Fallback: Load từ Users nếu không có trong Leaderboard/CurrentDaily
+                }
+
+                isLoaded = true;
+            });
+
+        yield return new WaitUntil(() => isLoaded);
+        callback?.Invoke(entries);
+    }
+
+    /// <summary>
+    /// ✅ THÊM: Save leaderboard vào Firebase
+    /// Gọi từ DailyRewardSystem lúc reward time
+    /// </summary>
+    public IEnumerator SaveLeaderboardToFirebase()
+    {
+        string today = System.DateTime.UtcNow.ToString("yyyy-MM-dd");
+
+        Debug.Log($"💾 Saving current leaderboard to Firebase for {today}...");
+
+        // Tạo snapshot
+        var leaderboardSnapshot = new LeaderboardSnapshot
+        {
+            snapshotDate = today,
+            timestamp = System.DateTime.UtcNow.ToString("O"),
+            levelRanking = new Dictionary<string, LeaderboardRankEntry>(),
+            questRanking = new Dictionary<string, LeaderboardRankEntry>()
+        };
+
+        // Save Level Ranking
+        for (int i = 0; i < cachedLevelLeaderboard.Count; i++)
+        {
+            var entry = cachedLevelLeaderboard[i];
+            leaderboardSnapshot.levelRanking[entry.playerId] = new LeaderboardRankEntry
+            {
+                rank = i + 1,
+                playerName = entry.playerName,
+                value = entry.value,
+                timestamp = System.DateTime.UtcNow.ToString("O")
+            };
         }
 
-        LoadAndDisplayQuestLeaderboard();
+        // Save Quest Ranking
+        for (int i = 0; i < cachedQuestLeaderboard.Count; i++)
+        {
+            var entry = cachedQuestLeaderboard[i];
+            leaderboardSnapshot.questRanking[entry.playerId] = new LeaderboardRankEntry
+            {
+                rank = i + 1,
+                playerName = entry.playerName,
+                value = entry.value,
+                timestamp = System.DateTime.UtcNow.ToString("O")
+            };
+        }
+
+        // Lưu vào Firebase
+        string json = JsonConvert.SerializeObject(leaderboardSnapshot);
+        bool isSaved = false;
+
+        FirebaseDatabase.DefaultInstance
+            .GetReference("Leaderboard/CurrentDaily")
+            .Child(today)
+            .SetRawJsonValueAsync(json)
+            .ContinueWithOnMainThread(task =>
+            {
+                if (task.IsCompleted && !task.IsFaulted)
+                {
+                    Debug.Log($"✅ Leaderboard saved to Firebase for {today}");
+                    isSaved = true;
+                }
+                else
+                {
+                    Debug.LogError($"❌ Failed to save leaderboard: {task.Exception}");
+                    isSaved = true;
+                }
+            });
+
+        yield return new WaitUntil(() => isSaved);
     }
 
-    // ✅ SỬA: Load và hiển thị bảng xếp hạng cấp độ
-    private void LoadAndDisplayLevelLeaderboard()
+    /// <summary>
+    /// ✅ THÊM: Refresh leaderboard từ Firebase (for real-time sync)
+    /// </summary>
+    public IEnumerator RefreshLeaderboardFromFirebase()
     {
+        Debug.Log($"🔄 Refreshing leaderboard from Firebase...");
+        yield return StartCoroutine(LoadAndCacheLeaderboardFromFirebase());
+
+        // Update UI display
+        if (isLevelLeaderboardActive)
+            DisplayLevelLeaderboard(cachedLevelLeaderboard);
+        else
+            DisplayQuestLeaderboard(cachedQuestLeaderboard);
+    }
+
+    /// <summary>
+    /// Load dữ liệu mới nhất từ Users để bảng xếp hạng cập nhật sau khi lên cấp/hoàn thành nhiệm vụ.
+    /// </summary>
+    public IEnumerator RefreshLeaderboardFromUsers()
+    {
+        if (isRefreshingLeaderboard)
+            yield break;
+
+        isRefreshingLeaderboard = true;
+        bool isLoaded = false;
+
+        List<LeaderboardEntry> levelEntries = new List<LeaderboardEntry>();
+        List<LeaderboardEntry> questEntries = new List<LeaderboardEntry>();
+
         FirebaseDatabase.DefaultInstance
             .GetReference("Users")
             .GetValueAsync()
             .ContinueWithOnMainThread(task =>
             {
-                if (task.IsCompleted && task.Result.Value != null)
+                if (task.IsCompleted && !task.IsFaulted && task.Result.Value != null)
                 {
-                    try
+                    foreach (var userSnapshot in task.Result.Children)
                     {
-                        var userSnapshots = task.Result.Children;
+                        string userId = userSnapshot.Key;
+                        string playerName = GetUserName(userSnapshot, userId);
+                        int currentLevel = GetUserLevel(userSnapshot);
+                        int completedQuestCount = GetCompletedQuestCount(userSnapshot);
 
-                        // ✅ DEBUG: Kiểm tra số lượng user
-                        Debug.Log($"═══════════════════════════════════════");
-                        Debug.Log($"🔍 FIREBASE USERS: {userSnapshots.Count()} người");
-                        Debug.Log($"═══════════════════════════════════════");
-
-                        List<(string userId, string name, int level)> allPlayers =
-                            new List<(string, string, int)>();
-
-                        int index = 0;
-                        foreach (var userSnapshot in userSnapshots)
-                        {
-                            index++;
-                            string userId = userSnapshot.Key;
-
-                            // Lấy Name
-                            var nameValue = userSnapshot.Child("Name").Value;
-                            string playerName = nameValue != null ? nameValue.ToString() : "Unknown";
-
-                            if (string.IsNullOrEmpty(playerName))
-                                playerName = $"Player_{userId.Substring(0, 6)}";
-
-                            // Lấy Level
-                            int playerLevel = 1;
-                            var levelSnapshot = userSnapshot.Child("Level");
-
-                            if (levelSnapshot.Value != null)
-                            {
-                                try
-                                {
-                                    string levelJson = levelSnapshot.GetRawJsonValue();
-                                    var levelData = JsonConvert.DeserializeObject<
-                                        Dictionary<string, object>>(levelJson);
-
-                                    if (levelData != null && levelData.ContainsKey("currentLevel"))
-                                    {
-                                        playerLevel = int.Parse(levelData["currentLevel"].ToString());
-                                    }
-                                }
-                                catch (Exception ex)
-                                {
-                                    Debug.LogWarning($"⚠️ Error parsing level: {ex.Message}");
-                                }
-                            }
-
-                            allPlayers.Add((userId, playerName, playerLevel));
-
-                            // ✅ DEBUG: Log từng user
-                            Debug.Log($"   [{index}] ✅ {playerName} → Level {playerLevel}");
-                        }
-
-                        Debug.Log($"═══════════════════════════════════════");
-                        Debug.Log($"📊 TỔNG NGƯỜI CHƠI ĐƯỢC THÊM: {allPlayers.Count}");
-                        Debug.Log($"═══════════════════════════════════════");
-
-                        // ✅ Sort theo level (giảm dần) và lấy top 10
-                        var sortedPlayers = allPlayers
-                            .OrderByDescending(p => p.level)
-                            .Take(maxLeaderboardEntries)
-                            .ToList();
-
-                        // ✅ DEBUG: Log sau khi sort
-                        Debug.Log($"🏆 BẢNG XẾP HẠNG (SAU KHI SORT):");
-                        foreach (var p in sortedPlayers)
-                        {
-                            int rank = sortedPlayers.IndexOf(p) + 1;
-                            Debug.Log($"   #{rank}: {p.name} → Level {p.level}");
-                        }
-
-                        // ✅ Hiển thị lên UI
-                        DisplayLevelLeaderboard(sortedPlayers.Select((p, idx) =>
-                            new LeaderboardEntry(p.userId, p.name, p.level, idx + 1)).ToList());
-
-                        Debug.Log($"✅ Loaded {sortedPlayers.Count} level leaderboard entries");
+                        levelEntries.Add(new LeaderboardEntry(userId, playerName, currentLevel, 0));
+                        questEntries.Add(new LeaderboardEntry(userId, playerName, completedQuestCount, 0));
                     }
-                    catch (Exception e)
-                    {
-                        Debug.LogError($"❌ Error loading level leaderboard: {e.Message}");
-                        Debug.LogError($"Stack trace: {e.StackTrace}");
-                    }
+
+                    cachedLevelLeaderboard = BuildRankedEntries(levelEntries);
+                    cachedQuestLeaderboard = BuildRankedEntries(questEntries);
+
+                    Debug.Log($"✅ Live leaderboard refreshed from Users: Level={cachedLevelLeaderboard.Count}, Quest={cachedQuestLeaderboard.Count}");
                 }
                 else
                 {
-                    Debug.LogError("❌ No users data found in Firebase");
+                    Debug.LogError($"❌ Failed to refresh leaderboard from Users: {task.Exception}");
                 }
+
+                isLoaded = true;
             });
+
+        yield return new WaitUntil(() => isLoaded);
+
+        if (isLevelLeaderboardActive)
+            DisplayLevelLeaderboard(cachedLevelLeaderboard);
+        else
+            DisplayQuestLeaderboard(cachedQuestLeaderboard);
+
+        yield return StartCoroutine(SaveLeaderboardToFirebase());
+        isRefreshingLeaderboard = false;
     }
 
-    // ✅ SỬA: Load và hiển thị bảng xếp hạng nhiệm vụ
-    // ✅ Load và hiển thị bảng xếp hạng nhiệm vụ
-    private void LoadAndDisplayQuestLeaderboard()
+    private List<LeaderboardEntry> BuildRankedEntries(List<LeaderboardEntry> entries)
     {
-        FirebaseDatabase.DefaultInstance
-            .GetReference("Users")
-            .GetValueAsync()
-            .ContinueWithOnMainThread(task =>
-            {
-                if (task.IsCompleted && task.Result.Value != null)
-                {
-                    try
-                    {
-                        var userSnapshots = task.Result.Children;
-                        List<(string userId, string name, int completedQuestCount)> allPlayers =
-                            new List<(string, string, int)>();
+        var rankedEntries = entries
+            .OrderByDescending(e => e.value)
+            .ThenBy(e => e.playerName)
+            .Take(maxLeaderboardEntries)
+            .ToList();
 
-                        Debug.Log($"🔍 Total users in Firebase: {userSnapshots.Count()}");
+        for (int i = 0; i < rankedEntries.Count; i++)
+        {
+            rankedEntries[i].rank = i + 1;
+        }
 
-                        foreach (var userSnapshot in userSnapshots)
-                        {
-                            string userId = userSnapshot.Key;
+        return rankedEntries;
+    }
 
-                            // Lấy Name
-                            var nameValue = userSnapshot.Child("Name").Value;
-                            string playerName = nameValue != null ? nameValue.ToString() : "Unknown";
+    private string GetUserName(DataSnapshot userSnapshot, string userId)
+    {
+        string playerName = userSnapshot.Child("Name").Value?.ToString();
 
-                            if (string.IsNullOrEmpty(playerName))
-                                playerName = $"Player_{userId.Substring(0, 6)}";
+        if (string.IsNullOrWhiteSpace(playerName))
+        {
+            string shortId = userId.Length > 6 ? userId.Substring(0, 6) : userId;
+            return $"Player_{shortId}";
+        }
 
-                            // ✅ Lấy tổng số nhiệm vụ đã hoàn thành
-                            int completedQuestCount = 0;
-                            var questSnapshot = userSnapshot.Child("Quests");
+        return playerName.Trim();
+    }
 
-                            if (questSnapshot.Value != null)
-                            {
-                                try
-                                {
-                                    string questJson = questSnapshot.GetRawJsonValue();
-                                    var questData = JsonConvert.DeserializeObject<
-                                        Dictionary<string, object>>(questJson);
+    private int GetUserLevel(DataSnapshot userSnapshot)
+    {
+        try
+        {
+            var levelSnapshot = userSnapshot.Child("Level");
+            if (levelSnapshot.Value == null)
+                return 1;
 
-                                    if (questData != null && questData.ContainsKey("completedQuestIds"))
-                                    {
-                                        var completedList = questData["completedQuestIds"] as Newtonsoft.Json.Linq.JArray;
+            var levelData = JsonConvert.DeserializeObject<LevelSystem.LevelData>(levelSnapshot.GetRawJsonValue());
+            return Mathf.Max(1, levelData?.currentLevel ?? 1);
+        }
+        catch (Exception e)
+        {
+            Debug.LogWarning($"⚠️ Error parsing user level: {e.Message}");
+            return 1;
+        }
+    }
 
-                                        // ✅ Lấy tổng số phần tử trong list
-                                        completedQuestCount = (completedList != null) ? completedList.Count : 0;
+    private int GetCompletedQuestCount(DataSnapshot userSnapshot)
+    {
+        try
+        {
+            var questSnapshot = userSnapshot.Child("Quests");
+            if (questSnapshot.Value == null)
+                return 0;
 
-                                        Debug.Log($"   📊 {playerName}: Completed {completedQuestCount} quests");
-                                    }
-                                }
-                                catch (Exception ex)
-                                {
-                                    Debug.LogWarning($"⚠️ Error parsing quest for {userId}: {ex.Message}");
-                                }
-                            }
-                            else
-                            {
-                                Debug.LogWarning($"⚠️ No Quest data for {userId}, using 0 completed quests");
-                            }
-
-                            allPlayers.Add((userId, playerName, completedQuestCount));
-                            Debug.Log($"   ✅ Added: {playerName} (Completed Quests: {completedQuestCount})");
-                        }
-
-                        // ✅ Sort theo tổng số nhiệm vụ hoàn thành (giảm dần) và lấy top 10
-                        var sortedPlayers = allPlayers
-                            .OrderByDescending(p => p.completedQuestCount)
-                            .Take(maxLeaderboardEntries)
-                            .ToList();
-
-                        Debug.Log($"🏆 BẢNG XẾP HẠNG NHIỆM VỤ (SAU KHI SORT):");
-                        foreach (var p in sortedPlayers)
-                        {
-                            int rank = sortedPlayers.IndexOf(p) + 1;
-                            Debug.Log($"   #{rank}: {p.name} → {p.completedQuestCount} quests");
-                        }
-
-                        // ✅ Hiển thị lên UI
-                        DisplayQuestLeaderboard(sortedPlayers.Select((p, idx) =>
-                            new LeaderboardEntry(p.userId, p.name, p.completedQuestCount, idx + 1)).ToList());
-
-                        Debug.Log($"✅ Loaded {sortedPlayers.Count} quest leaderboard entries");
-                    }
-                    catch (Exception e)
-                    {
-                        Debug.LogError($"❌ Error loading quest leaderboard: {e.Message}");
-                        Debug.LogError($"Stack trace: {e.StackTrace}");
-                    }
-                }
-                else
-                {
-                    Debug.LogError("❌ No users data found in Firebase");
-                }
-            });
+            var questData = JsonConvert.DeserializeObject<QuestSystem.QuestData>(questSnapshot.GetRawJsonValue());
+            return questData?.completedQuestIds?.Count ?? 0;
+        }
+        catch (Exception e)
+        {
+            Debug.LogWarning($"⚠️ Error parsing user quests: {e.Message}");
+            return 0;
+        }
     }
 
     private void DisplayLevelLeaderboard(List<LeaderboardEntry> entries)
     {
-        // ✅ XÓA: Không reset scroll ở đây
         for (int i = 0; i < levelDisplayedEntries.Count; i++)
         {
             if (i < entries.Count)
@@ -390,7 +496,6 @@ public class LeaderboardManager : MonoBehaviour
 
     private void DisplayQuestLeaderboard(List<LeaderboardEntry> entries)
     {
-        // ✅ XÓA: Không reset scroll ở đây
         for (int i = 0; i < questDisplayedEntries.Count; i++)
         {
             if (i < entries.Count)
@@ -417,6 +522,15 @@ public class LeaderboardManager : MonoBehaviour
             texts[1].text = entry.playerName;
             texts[2].text = entry.value.ToString();
         }
+    }
 
+    // ✅ Public getters for cached leaderboards
+    public List<LeaderboardEntry> GetLevelLeaderboard()
+    {
+        return new List<LeaderboardEntry>(cachedLevelLeaderboard);
+    }
+    public List<LeaderboardEntry> GetQuestLeaderboard()
+    {
+        return new List<LeaderboardEntry>(cachedQuestLeaderboard);
     }
 }

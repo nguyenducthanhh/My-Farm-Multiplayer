@@ -2,6 +2,7 @@
 using Firebase.Extensions;
 using Newtonsoft.Json;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -46,18 +47,30 @@ public class LevelSystem : MonoBehaviour
 
         if (levelConfig == null)
             Debug.LogError("❌ LevelConfig not assigned!");
-        else
-        {
-            // ✅ THÊM: Khởi tạo experienceToNextLevel đúng từ LevelConfig
-            experienceToNextLevel = GetExperienceForLevel(currentLevel + 1);
-            Debug.Log($"✅ Initialized experienceToNextLevel: {experienceToNextLevel}");
-        }
-        LoadLevelDataFromFirebase();
 
+        RecalculateExperienceToNextLevel();
+        Debug.Log($"✅ Initialized experienceToNextLevel: {experienceToNextLevel}");
+
+        StartCoroutine(WaitForUserDataAndLoadLevel());
+
+    }
+
+    private IEnumerator WaitForUserDataAndLoadLevel()
+    {
+        while (LoadDataManager.firebaseUser == null ||
+               LoadDataManager.userInGame == null ||
+               !LoadDataManager.IsUserDataLoaded)
+        {
+            yield return new WaitForSeconds(0.1f);
+        }
+
+        LoadLevelDataFromFirebase();
     }
 
     public void AddExperience(int amount)
     {
+        RecalculateExperienceToNextLevel();
+
         currentExperience += amount;
         Debug.Log($"📊 +{amount} XP (Total: {currentExperience}/{experienceToNextLevel})");
 
@@ -75,7 +88,7 @@ public class LevelSystem : MonoBehaviour
         currentLevel++;
 
         // ✅ Lấy XP requirement từ config
-        experienceToNextLevel = GetExperienceForLevel(currentLevel + 1);
+        RecalculateExperienceToNextLevel();
 
         Debug.Log($"🎉 LÊN CẤP {currentLevel}! EXP: {currentExperience}/{experienceToNextLevel}");
 
@@ -154,13 +167,37 @@ public class LevelSystem : MonoBehaviour
         return threshold != null ? threshold.experienceRequired : 100 + (level * 50);
     }
 
+    private void RecalculateExperienceToNextLevel()
+    {
+        experienceToNextLevel = Mathf.Max(1, GetExperienceForLevel(currentLevel + 1));
+    }
+
+    private void NormalizeLevelProgressFromConfig()
+    {
+        RecalculateExperienceToNextLevel();
+
+        int guard = 0;
+        while (currentExperience >= experienceToNextLevel && guard < 100)
+        {
+            currentExperience -= experienceToNextLevel;
+            currentLevel++;
+            RecalculateExperienceToNextLevel();
+            guard++;
+        }
+
+        if (guard >= 100)
+        {
+            Debug.LogWarning("⚠️ Level normalization stopped after 100 level-ups. Check LevelConfig thresholds.");
+        }
+    }
+
     // ✅ THÊM: Getter cho LevelData (để save)
 
 
     public int GetCurrentLevel() => currentLevel;
     public int GetCurrentExperience() => currentExperience;
     public int GetExperienceToNextLevel() => experienceToNextLevel;
-    public float GetExperienceProgress() => (float)currentExperience / experienceToNextLevel;
+    public float GetExperienceProgress() => (float)currentExperience / Mathf.Max(1, experienceToNextLevel);
     public List<string> GetUnlockedItems() => unlockedItems;
     private void LoadLevelDataFromFirebase()
     {
@@ -173,7 +210,7 @@ public class LevelSystem : MonoBehaviour
             .GetValueAsync()
             .ContinueWithOnMainThread(task =>
             {
-                if (task.IsCompleted && task.Result.Value != null)
+                if (task.IsCompleted && !task.IsFaulted && task.Result.Value != null)
                 {
                     try
                     {
@@ -182,12 +219,12 @@ public class LevelSystem : MonoBehaviour
 
                         if (levelData != null)
                         {
-                            currentLevel = levelData.currentLevel;
-                            currentExperience = levelData.currentExperience;
-                            experienceToNextLevel = levelData.experienceToNextLevel;
-                            unlockedItems = levelData.unlockedItems;
+                            currentLevel = Mathf.Max(1, levelData.currentLevel);
+                            currentExperience = Mathf.Max(0, levelData.currentExperience);
+                            unlockedItems = levelData.unlockedItems ?? new List<string>();
+                            NormalizeLevelProgressFromConfig();
 
-                            Debug.Log($"✅ Loaded Level: {currentLevel}");
+                            Debug.Log($"✅ Loaded Level: {currentLevel}, EXP: {currentExperience}/{experienceToNextLevel}");
                         }
                     }
                     catch (Exception e)
@@ -195,10 +232,18 @@ public class LevelSystem : MonoBehaviour
                         Debug.LogError($"Error loading level data: {e.Message}");
                     }
                 }
+                else if (task.IsFaulted || task.IsCanceled)
+                {
+                    Debug.LogError($"Failed to load level data. Keeping local defaults and not saving over Firebase: {task.Exception}");
+                    return;
+                }
                 else
                 {
-                    Debug.Log("No level data found");
-                    SaveLevelDataToFirebase();
+                    Debug.LogWarning("No level data found. Keeping local defaults and not saving automatically.");
+                    currentLevel = 1;
+                    currentExperience = 0;
+                    unlockedItems = new List<string>();
+                    RecalculateExperienceToNextLevel();
                 }
                 CheckUnlockedItems();
             });
@@ -206,7 +251,7 @@ public class LevelSystem : MonoBehaviour
 
     private void SaveLevelDataToFirebase()
     {
-        if (LoadDataManager.firebaseUser == null) return;
+        if (LoadDataManager.firebaseUser == null || !LoadDataManager.IsUserDataLoaded || !LoadDataManager.HasUserRecord) return;
 
         var levelData = new LevelData
         {

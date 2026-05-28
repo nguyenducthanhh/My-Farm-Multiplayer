@@ -20,8 +20,8 @@ public class PlayerFarmController : MonoBehaviour
     private string pendingSeedType;
     private int pendingSeedQuantity;
     private Sprite pendingSeedSprite;
-    private SeedSlot currentSelectedSlot = null;
-    private PlantData selectedPlantData;
+    public SeedSlot currentSelectedSlot = null;
+    public PlantData selectedPlantData;
 
     [SerializeField] Tilemap tM_Ground;
     [SerializeField] Tilemap tM_Grass;
@@ -289,8 +289,25 @@ public class PlayerFarmController : MonoBehaviour
             plantDataDict[plantData.plantType] = plantData;
         }
     }
-    void Start()
+    IEnumerator Start()
     {
+        while (LoadDataManager.userInGame == null || !LoadDataManager.IsUserDataLoaded)
+        {
+            if (LoadDataManager.UserDataLoadFailed)
+            {
+                Debug.LogError("PlayerFarmController skipped because user data failed to load.");
+                yield break;
+            }
+
+            yield return new WaitForSeconds(0.1f);
+        }
+
+        if (!LoadDataManager.HasUserRecord)
+        {
+            Debug.LogError("PlayerFarmController skipped because user record is missing.");
+            yield break;
+        }
+
         LoadAvailableSeeds();
         // Load seed slots from Firebase
         if (seedSlot1 != null)

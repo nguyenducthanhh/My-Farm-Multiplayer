@@ -1,65 +1,4 @@
-﻿//using UnityEngine;
-//using UnityEngine.UI;
-
-//public class QuestSlotUI : MonoBehaviour
-//{
-//    [SerializeField] private Text questNameText;
-//    [SerializeField] private Text questDescriptionText;
-//    [SerializeField] private Text requirementsText;
-//    [SerializeField] private Button completeButton;
-//    [SerializeField] private Text rewardText;
-
-//    private QuestConfig.Quest currentQuest;
-//    private RecyclableInventory inventory;
-
-//    public void SetQuest(QuestConfig.Quest quest, RecyclableInventory inv)
-//    {
-//        currentQuest = quest;
-//        inventory = inv;
-
-//        gameObject.SetActive(true);
-
-//        questNameText.text = quest.questName;
-//        questDescriptionText.text = quest.questDescription;
-//        rewardText.text = $"⭐ +{quest.rewardExperience} XP | 💰 +{quest.rewardGold}";
-
-//        // ✅ Hiển thị yêu cầu
-//        string reqText = "Yêu cầu:\n";
-//        foreach (var req in quest.requirements)
-//        {
-//            int have = inventory.GetItemQuantity(req.itemName);
-//            reqText += $"• {req.itemName} x{req.quantity} ({have}/{req.quantity})\n";
-//        }
-//        requirementsText.text = reqText;
-
-//        // ✅ Update button
-//        if (completeButton != null)
-//        {
-//            completeButton.onClick.RemoveAllListeners();
-//            completeButton.onClick.AddListener(OnCompleteButtonClicked);
-//            completeButton.interactable = QuestSystem.Instance.CanCompleteQuest(quest, inventory);
-//        }
-//    }
-
-//    public void HideQuest()
-//    {
-//        gameObject.SetActive(false);
-//    }
-
-//    private void OnCompleteButtonClicked()
-//    {
-//        if (currentQuest == null) return;
-
-//        if (!QuestSystem.Instance.CanCompleteQuest(currentQuest, inventory))
-//        {
-//            Debug.Log("❌ Không đủ items để hoàn thành quest!");
-//            return;
-//        }
-
-//        QuestSystem.Instance.CompleteQuest(currentQuest, inventory);
-//    }
-//}
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -83,7 +22,7 @@ public class QuestSlotUI : MonoBehaviour
 
         questNameText.text = quest.questName;
         questDescriptionText.text = quest.questDescription;
-        rewardText.text = $"⭐ +{quest.rewardExperience} XP | 💰 +{quest.rewardGold}";
+        rewardText.text = $" +{quest.rewardExperience} XP | +{quest.rewardGold} Vàng";
         
 
         // ✅ Debug: Kiểm tra requirements

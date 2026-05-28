@@ -17,10 +17,10 @@ public class BaitShopItemUI : MonoBehaviour
         fishermanController = controller;
 
         if (baitNameText != null)
-            baitNameText.text = $"Mồi {item.baitData.description}";
+            baitNameText.text = item.baitData.description;
 
         if (priceText != null)
-            priceText.text = $"{item.price} Gold";
+            priceText.text = $"Mua {item.price} vàng";
 
         if (purchaseButton != null)
         {

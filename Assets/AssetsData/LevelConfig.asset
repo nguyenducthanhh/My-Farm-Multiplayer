@@ -35,6 +35,8 @@ MonoBehaviour:
     experienceRequired: 220
   - level: 11
     experienceRequired: 240
+  - level: 12
+    experienceRequired: 260
   levelUnlocks:
   - requiredLevel: 1
     unlockedItemName: Paddy
@@ -48,11 +50,11 @@ MonoBehaviour:
     unlockedItemName: Corn
     unlockedItemDescription: "H\u1EA1t gi\u1ED1ng ng\xF4"
     unlockType: 0
-  - requiredLevel: 1
+  - requiredLevel: 3
     unlockedItemName: chicken_pen_1
     unlockedItemDescription: "Chu\u1ED3ng g\xE0"
     unlockType: 1
-  - requiredLevel: 2
+  - requiredLevel: 6
     unlockedItemName: pig_pen_1
     unlockedItemDescription: "Chu\u1ED3ng l\u1EE3n"
     unlockType: 1
@@ -60,11 +62,11 @@ MonoBehaviour:
     unlockedItemName: Carrot
     unlockedItemDescription: "H\u1EA1t gi\u1ED1ng c\xE0 r\u1ED1t"
     unlockType: 0
-  - requiredLevel: 9
-    unlockedItemName: Strawberry
-    unlockedItemDescription: "H\u1EA1t gi\u1ED1ng d\xE2u"
-    unlockType: 0
-  - requiredLevel: 3
+  - requiredLevel: 8
     unlockedItemName: cow_pen_1
     unlockedItemDescription: "Chu\u1ED3ng b\xF2"
     unlockType: 1
+  - requiredLevel: 8
+    unlockedItemName: Strawberry
+    unlockedItemDescription: "H\u1EA1t gi\u1ED1ng d\xE2u"
+    unlockType: 0

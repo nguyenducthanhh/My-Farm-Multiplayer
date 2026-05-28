@@ -17,41 +17,37 @@ public class TileMapManager : MonoBehaviour
     public Tilemap tm_Grass;
     public Tilemap tm_Forest;
     public Tilemap tm_GroundWet;
-    //public TileBase tb_Forest;
-    [SerializeField] FirebaseDatabaseManager firebaseDatabaseManager;
-    private DatabaseReference reference;
     public PlayerFarmController playerFarmController;
 
-    
-
-    //private float checkInterval = 1f; // moi 1 giay
-    private float timer;
     void Update()
     {
-        //timer += Time.deltaTime;
-        //if (timer >= checkInterval)
-        //{
-        //    timer = 0f;
-        //   // UpdateGrowingPlants();
-        //}
     }
 
-    private void Start()
+    private IEnumerator Start()
     {
-        //firebaseDatabaseManager = GetComponent<FirebaseDatabaseManager>();
-        //firebaseDatabaseManager = GameObject.Find("DatabaseManager").GetComponent<FirebaseDatabaseManager>();
+        while (LoadDataManager.userInGame == null || !LoadDataManager.IsUserDataLoaded)
+        {
+            if (LoadDataManager.UserDataLoadFailed)
+            {
+                Debug.LogError("TileMapManager skipped because user data failed to load.");
+                yield break;
+            }
 
-        if (LoadDataManager.userInGame.MapInGame.lstTilemapDetail != null)
+            yield return new WaitForSeconds(0.1f);
+        }
+
+        if (!LoadDataManager.HasUserRecord)
+        {
+            Debug.LogError("TileMapManager skipped because user record is missing.");
+            yield break;
+        }
+
+        if (LoadDataManager.userInGame.MapInGame?.lstTilemapDetail != null)
         {
             LoadMapForUser();
         }
-        //else
-        //{
-        //   // WriteAllTileMapToFirebase();
 
-        //}
-        FirebaseApp app = FirebaseApp.DefaultInstance;
-        reference = FirebaseDatabase.DefaultInstance.RootReference;
+        //FirebaseApp app = FirebaseApp.DefaultInstance;
 
         playerFarmController.LoadPlantsFromFirebase();
 
@@ -103,15 +99,15 @@ public class TileMapManager : MonoBehaviour
 
     public void SetStateForTilemapDetail(int x, int y, TileMapState state)
     {
+        if (!LoadDataManager.IsUserDataLoaded || !LoadDataManager.HasUserRecord)
+            return;
+
         for (int i = 0;i < LoadDataManager.userInGame.MapInGame.GetLength();i++)
         {
             if (LoadDataManager.userInGame.MapInGame.lstTilemapDetail[i].x == x && LoadDataManager.userInGame.MapInGame.lstTilemapDetail[i].y == y)
             {
                 LoadDataManager.userInGame.MapInGame.lstTilemapDetail[i].tilemapState = state;
-                //LoadDataManager.userInGame.MapInGame.lstTilemapDetail[i].growTime = DateTime.Now;
 
-                //firebaseDatabaseManager.WriteDatabase("Users/" + LoadDataManager.firebaseUser.UserId, LoadDataManager.userInGame.ToString());
-                //27/3
                 string mapJson = JsonConvert.SerializeObject(LoadDataManager.userInGame.MapInGame);
 
                 FirebaseDatabase.DefaultInstance
@@ -138,6 +134,9 @@ public class TileMapManager : MonoBehaviour
 
     public void SaveToFirebase()
     {
+        if (!LoadDataManager.IsUserDataLoaded || !LoadDataManager.HasUserRecord)
+            return;
+
         string json = JsonConvert.SerializeObject(allPlantedTiles);
         FirebaseDatabase.DefaultInstance
             .GetReference("Users")
@@ -155,13 +154,6 @@ public class TileMapManager : MonoBehaviour
         SaveToFirebase();
     }
 
-    //void UpdatePlantVisual(Vector3Int pos, PlantTileData plant, PlantData data)
-    //{
-    //    TileBase tile = data.growthTiles[plant.currentStage];
-
-    //    tm_Forest.SetTile(pos, tile);
-    //}
-
     void UpdatePlants()
     {
         foreach (var plant in allPlantedTiles)
@@ -178,7 +170,6 @@ public class TileMapManager : MonoBehaviour
 
                 Vector3Int pos = new Vector3Int(plant.x, plant.y, 0);
 
-               //UpdatePlantVisual(pos, plant, plantData);
                 playerFarmController.UpdatePlantVisual(pos, plant);
             }
         }

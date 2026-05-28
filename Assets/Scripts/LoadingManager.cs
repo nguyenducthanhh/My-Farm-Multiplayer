@@ -16,21 +16,6 @@ public class LoadingManager : MonoBehaviour
     {
         StartCoroutine(LoadSceneFixedTime(NEXT_SCENE));
     }
-
-    public IEnumerator LoadSceneAsync(string sceneName)
-    {
-        AsyncOperation operation = SceneManager.LoadSceneAsync(sceneName);
-
-        while (operation.isDone)
-        {
-            float progress = Mathf.Clamp01(operation.progress / 0.9f);
-            progressBar.GetComponent<Image>().fillAmount = progress;
-            textPercent.text = (progress * 100).ToString("0") + "%";
-
-            yield return null;
-        }
-    }
-
     public IEnumerator LoadSceneFixedTime(string sceneName)
     {
         float elapsedTime = 0f;

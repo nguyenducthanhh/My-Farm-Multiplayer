@@ -17,18 +17,30 @@ public class PlayerMovement : MonoBehaviour
     private Vector2 input;
     private float savePositionTimer = 0f;
     private const float SAVE_INTERVAL = 2f;
+    private bool hasLoadedPosition = false;
+    private bool hasMovedAfterLoad = false;
+    private Vector3 loadedPosition;
 
     private void Awake()
     {
         rb = GetComponent<Rigidbody2D>();
         animator = GetComponent<Animator>();
         playerCollider = GetComponent<Collider2D>();  // ✅ THÊM: Get collider
-
-        LoadPlayerPosition();
     }
 
     private void Start()
     {
+        StartCoroutine(WaitForUserDataAndLoadPosition());
+    }
+
+    private IEnumerator WaitForUserDataAndLoadPosition()
+    {
+        while (LoadDataManager.userInGame == null || !LoadDataManager.IsUserDataLoaded || !LoadDataManager.HasUserRecord)
+        {
+            yield return new WaitForSeconds(0.1f);
+        }
+
+        LoadPlayerPosition();
     }
 
  void Update()
@@ -42,6 +54,11 @@ public class PlayerMovement : MonoBehaviour
 
         input.x = Input.GetAxisRaw("Horizontal");
         input.y = Input.GetAxisRaw("Vertical");
+
+        if (hasLoadedPosition && input.sqrMagnitude > 0.01f)
+        {
+            hasMovedAfterLoad = true;
+        }
 
         UpdateAnimation(input);
 
@@ -83,7 +100,10 @@ public class PlayerMovement : MonoBehaviour
 
     private void SavePlayerPositionImmediately()
     {
-        if (LoadDataManager.userInGame == null || LoadDataManager.firebaseUser == null)
+        if (LoadDataManager.userInGame == null || LoadDataManager.firebaseUser == null || !LoadDataManager.IsUserDataLoaded || !LoadDataManager.HasUserRecord)
+            return;
+
+        if (LoadDataManager.LastPositionWasRepaired && !hasMovedAfterLoad)
             return;
 
         LoadDataManager.userInGame.LastPosition = new User.PlayerPosition
@@ -111,7 +131,10 @@ public class PlayerMovement : MonoBehaviour
 
     private void SavePlayerPosition()
     {
-        if (LoadDataManager.userInGame == null || LoadDataManager.firebaseUser == null)
+        if (LoadDataManager.userInGame == null || LoadDataManager.firebaseUser == null || !LoadDataManager.IsUserDataLoaded || !LoadDataManager.HasUserRecord)
+            return;
+
+        if (LoadDataManager.LastPositionWasRepaired && !hasMovedAfterLoad)
             return;
 
         LoadDataManager.userInGame.LastPosition = new User.PlayerPosition
@@ -152,6 +175,9 @@ public class PlayerMovement : MonoBehaviour
         );
 
         transform.position = savedPosition;
+        loadedPosition = savedPosition;
+        hasLoadedPosition = true;
+        hasMovedAfterLoad = false;
         Debug.Log($"✅ Position loaded: {savedPosition}");
     }
 }

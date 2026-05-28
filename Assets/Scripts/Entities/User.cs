@@ -1,13 +1,14 @@
 ﻿using Newtonsoft.Json;
-using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class User 
+public class User
 {
     public string Name { get; set; }
     public int Gold { get; set; }
+
     public Map MapInGame { get; set; }
+
     public List<InventoryItems> Inventory { get; set; }
 
     [System.Serializable]
@@ -17,26 +18,59 @@ public class User
         public float y;
         public float z;
     }
+
     public PlayerPosition LastPosition { get; set; }
+
+    [System.Serializable]
+    public class DailyRewardData
+    {
+
+        // ✅ QUÀ HÀNG NGÀY (Base Reward)
+        public string lastDailyClaimDate;           // Ngày claim quà hàng ngày cuối cùng
+        public int lastDailyClaimGold;              // Gold nhận được từ quà hàng ngày
+        public bool hasClaimedDailyToday;           // Đã claim quà hàng ngày hôm nay?
+
+        // ✅ QUÀ RANKING (Top 1,2,3 Bonus)
+        public string lastRankingRewardDate;        // Ngày nhận quà ranking cuối cùng
+        public int lastRankingRewardGold;           // Gold nhận được từ quà ranking
+        public bool hasClaimedRankingToday;         // Đã claim quà ranking hôm nay?
+
+        // ✅ SNAPSHOT TRACKER
+        public string lastSavedSnapshotDate;        // Ngày snapshot được lưu
+
+        // ✅ ACCOUNT CREATED DATE - THÊM TRƯỜNG NÀY
+        public string accountCreatedDate;           // Ngày tạo account (để kiểm tra account mới)
+
+        public DailyRewardData()
+        {
+            lastDailyClaimDate = "";
+            lastDailyClaimGold = 0;
+            hasClaimedDailyToday = false;
+
+            lastRankingRewardDate = "";
+            lastRankingRewardGold = 0;
+            hasClaimedRankingToday = false;
+
+            lastSavedSnapshotDate = "";
+
+            // ✅ THÊM: Khởi tạo accountCreatedDate = hôm nay
+            accountCreatedDate = System.DateTime.UtcNow.ToString("yyyy-MM-dd");
+        }
+    }
+
+    public DailyRewardData DailyReward { get; set; }
 
     public User()
     {
-        LastPosition = new PlayerPosition { x = 0, y = 0, z = 0 };
-    }
+        LastPosition = new PlayerPosition
+        {
+            x = 0,
+            y = 0,
+            z = 0
+        };
 
-    //public User(string name, int gold)
-    //{
-    //    Name = name;
-    //    Gold = gold;
-    //    Inventory = new List<InventoryItems>();
-    //}
-    //public User(string name, int gold, Map mapInGame)
-    //{
-    //    Name = name;
-    //    Gold = gold;
-    //    MapInGame = mapInGame;
-    //    Inventory = new List<InventoryItems>();
-    //}
+        DailyReward = new DailyRewardData();
+    }
 
     public override string ToString()
     {

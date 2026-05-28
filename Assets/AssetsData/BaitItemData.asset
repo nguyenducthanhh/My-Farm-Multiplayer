@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: BaitItemData
   m_EditorClassIdentifier: 
   itemName: worm_bait
-  description: "M\u1ED3i c\xE2u"
+  description: "M\u1ED3i c\xE2u c\xE1"
   maxStack: 99
   seedSprite: {fileID: 0}
   harvestedSprite: {fileID: -1903295807, guid: b80ff46864ffe56469e12ae75c993761, type: 3}

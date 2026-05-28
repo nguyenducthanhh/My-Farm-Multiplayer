@@ -2,6 +2,7 @@
 using Firebase.Extensions;
 using Newtonsoft.Json;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -50,6 +51,24 @@ public class QuestSystem : MonoBehaviour
         Debug.Log($"✅ QuestConfig loaded: {questConfig.allQuests.Count} quests");
 
 
+        StartCoroutine(WaitForUserDataAndLoadQuests());
+    }
+
+    private IEnumerator WaitForUserDataAndLoadQuests()
+    {
+        while (LoadDataManager.firebaseUser == null ||
+               LoadDataManager.userInGame == null ||
+               !LoadDataManager.IsUserDataLoaded)
+        {
+            if (LoadDataManager.UserDataLoadFailed)
+            {
+                Debug.LogError("Quest data load skipped because user data failed to load.");
+                yield break;
+            }
+
+            yield return new WaitForSeconds(0.1f);
+        }
+
         LoadQuestDataFromFirebase();
     }
 
@@ -62,28 +81,6 @@ public class QuestSystem : MonoBehaviour
         }
     }
 
-    //private void AddNewQuest()
-    //{
-    //    if (questConfig == null || questConfig.allQuests.Count == 0) return;
-
-    //    // ✅ Tìm quest chưa hoàn thành và chưa active
-    //    foreach (var quest in questConfig.allQuests)
-    //    {
-    //        if (!completedQuestIds.Contains(quest.questId) && !IsQuestActive(quest.questId))
-    //        {
-    //            // ✅ Kiểm tra cấp độ
-    //            if (LevelSystem.Instance.GetCurrentLevel() >= quest.minimumLevel)
-    //            {
-    //                activeQuests.Enqueue(quest);
-    //                Debug.Log($"📋 Added quest: {quest.questName}");
-
-    //                if (activeQuests.Count < 4)
-    //                    AdvanceQuests();  // ← Đệ quy thêm quest cho đủ 4 cái
-    //                return;
-    //            }
-    //        }
-    //    }
-    //}
     private void AddNewQuest()
     {
         if (questConfig == null || questConfig.allQuests.Count == 0) return;
@@ -132,6 +129,51 @@ public class QuestSystem : MonoBehaviour
     }
 
     // ✅ Hoàn thành quest
+    //public void CompleteQuest(QuestConfig.Quest quest, RecyclableInventory inventory)
+    //{
+    //    if (!CanCompleteQuest(quest, inventory)) return;
+
+    //    // ✅ Trừ items từ inventory
+    //    foreach (var requirement in quest.requirements)
+    //    {
+    //        inventory.RemoveInventoryItem(requirement.itemName, requirement.quantity);
+    //        Debug.Log($"✅ Trừ {requirement.quantity}x {requirement.itemName}");
+    //    }
+
+    //    // ✅ Trao thưởng
+    //    if (quest.rewardGold > 0)
+    //    {
+    //        LoadDataManager.userInGame.Gold += quest.rewardGold;
+    //        Debug.Log($"💰 +{quest.rewardGold} Gold");
+    //    }
+
+    //    if (quest.rewardExperience > 0)
+    //    {
+    //        LevelSystem.Instance.AddExperience(quest.rewardExperience);
+    //        Debug.Log($"⭐ +{quest.rewardExperience} XP");
+    //    }
+
+    //    // ✅ Đánh dấu hoàn thành
+    //    completedQuestIds.Add(quest.questId);
+
+    //    // ✅ Xóa quest khỏi active list
+    //    var tempQueue = new Queue<QuestConfig.Quest>();
+    //    while (activeQuests.Count > 0)
+    //    {
+    //        var q = activeQuests.Dequeue();
+    //        if (q.questId != quest.questId)
+    //            tempQueue.Enqueue(q);
+    //    }
+    //    activeQuests = tempQueue;
+
+    //    // ✅ Thêm quest mới
+    //    AdvanceQuests();
+
+    //    // ✅ Broadcast event
+    //    OnQuestCompleted?.Invoke(quest);
+
+    //    SaveQuestDataToFirebase();
+    //}
     public void CompleteQuest(QuestConfig.Quest quest, RecyclableInventory inventory)
     {
         if (!CanCompleteQuest(quest, inventory)) return;
@@ -175,9 +217,35 @@ public class QuestSystem : MonoBehaviour
         // ✅ Broadcast event
         OnQuestCompleted?.Invoke(quest);
 
+        // ✅ Save quest data
         SaveQuestDataToFirebase();
+
+        // ✅ THÊM: Save gold lên Firebase
+        SaveGoldToFirebase();
     }
 
+    // ✅ THÊM: Hàm mới để save gold
+    private void SaveGoldToFirebase()
+    {
+        if (LoadDataManager.firebaseUser == null) return;
+
+        FirebaseDatabase.DefaultInstance
+            .GetReference("Users")
+            .Child(LoadDataManager.firebaseUser.UserId)
+            .Child("Gold")
+            .SetValueAsync(LoadDataManager.userInGame.Gold)
+            .ContinueWithOnMainThread(task =>
+            {
+                if (task.IsCompleted && !task.IsFaulted)
+                {
+                    Debug.Log($"✅ Gold saved to Firebase: {LoadDataManager.userInGame.Gold}");
+                }
+                else
+                {
+                    Debug.LogError($"❌ Failed to save gold: {task.Exception}");
+                }
+            });
+    }
     // ✅ Getter
     public Queue<QuestConfig.Quest> GetActiveQuests() => activeQuests;
     public int GetActiveQuestCount() => activeQuests.Count;
@@ -186,7 +254,7 @@ public class QuestSystem : MonoBehaviour
     {
         if (LoadDataManager.firebaseUser == null)
         {
-            InitializeQuests();
+            Debug.LogError("Firebase user is null. Quest data will not be initialized or saved.");
             return;
         }
 
@@ -197,7 +265,7 @@ public class QuestSystem : MonoBehaviour
             .GetValueAsync()
             .ContinueWithOnMainThread(task =>
             {
-                if (task.IsCompleted && task.Result.Value != null)
+                if (task.IsCompleted && !task.IsFaulted && task.Result.Value != null)
                 {
                     try
                     {
@@ -222,14 +290,17 @@ public class QuestSystem : MonoBehaviour
                     catch (Exception e)
                     {
                         Debug.LogError($"Error loading quest data: {e.Message}");
-                        InitializeQuests();
                     }
+                }
+                else if (task.IsFaulted || task.IsCanceled)
+                {
+                    Debug.LogError($"Failed to load quest data. Keeping local defaults and not saving over Firebase: {task.Exception}");
+                    return;
                 }
                 else
                 {
                     Debug.Log("No quest data found, initializing...");
                     InitializeQuests();
-
                 }
                 Debug.Log($"📊 Active quests after load: {activeQuests.Count}");
 
@@ -249,7 +320,7 @@ public class QuestSystem : MonoBehaviour
 
     private void SaveQuestDataToFirebase()
     {
-        if (LoadDataManager.firebaseUser == null) return;
+        if (LoadDataManager.firebaseUser == null || !LoadDataManager.IsUserDataLoaded || !LoadDataManager.HasUserRecord) return;
 
         var questData = new QuestData();
         foreach (var quest in activeQuests)

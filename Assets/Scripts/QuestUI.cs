@@ -4,22 +4,13 @@ using System.Collections.Generic;
 
 public class QuestUI : MonoBehaviour
 {
-    //[SerializeField] private GameObject questSlotPrefab;
-    //[SerializeField] private Transform questContainer;
+
     [SerializeField] private RecyclableInventory playerInventory;
 
     private List<QuestSlotUI> questSlots = new List<QuestSlotUI>();
 
     private void Start()
     {
-        //// ✅ Tạo 4 slot UI
-        //for (int i = 0; i < 4; i++)
-        //{
-        //    //GameObject slotGO = Instantiate(questSlotPrefab, questContainer);
-        //    QuestSlotUI slotUI = slotGO.GetComponent<QuestSlotUI>();
-        //    questSlots.Add(slotUI);
-        //}
-
         QuestSystem.OnQuestCompleted += OnQuestCompleted;
 
         UpdateQuestDisplay();
@@ -49,7 +40,7 @@ public class QuestUI : MonoBehaviour
 
     private void OnQuestCompleted(QuestConfig.Quest quest)
     {
-        Debug.Log($"✅ Quest completed: {quest.questName}");
+        Debug.Log($"Quest completed: {quest.questName}");
         UpdateQuestDisplay();
     }
 

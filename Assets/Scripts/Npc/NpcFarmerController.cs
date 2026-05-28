@@ -189,15 +189,4 @@ public class NpcFarmerController : MonoBehaviour
         }
     }
 
-    //[ContextMenu("Add Test Gold")]
-    //public void AddTestGold()
-    //{
-    //    if (LoadDataManager.userInGame != null)
-    //    {
-    //        LoadDataManager.userInGame.Gold += 100;
-    //        SaveUserDataToFirebase();
-    //        UpdateGoldDisplay();
-    //        Debug.Log("Added 1000 test gold");
-    //    }
-    //}
 }

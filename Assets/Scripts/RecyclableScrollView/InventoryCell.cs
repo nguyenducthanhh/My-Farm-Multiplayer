@@ -1,51 +1,4 @@
-﻿//using PolyAndCode.UI;
-//using UnityEngine;
-//using UnityEngine.EventSystems;
-//using UnityEngine.UI;
-
-//public class InventoryCell : MonoBehaviour, ICell
-//{
-//    [SerializeField] private Image itemImage;
-//    [SerializeField] private Text itemNameText;
-//    [SerializeField] private Text quantityText;
-
-//    private string itemName;
-//    private int itemQuantity;
-//    private PlayerFarmController farmController;
-
-//    public void ConfigureCell(string itemName, int quantity)
-//    {
-
-//        this.itemName = itemName;
-//        this.itemQuantity = quantity;
-
-//        if (itemNameText != null)
-//            itemNameText.text = itemName;
-
-//        if (quantityText != null)
-//            quantityText.text = $"x{quantity}";
-//    }
-
-//    public void SetSprite(Sprite sprite)
-//    {
-//        if (itemImage != null)
-//            itemImage.sprite = sprite;
-//    }
-
-//    public void OnPointerClick(PointerEventData eventData)
-//    {
-//        if (farmController != null && !string.IsNullOrEmpty(itemName))
-//        {
-//            var plantData = farmController.GetPlantData(itemName);
-//            if (plantData != null)
-//            {
-//                farmController.OnSeedSelected(itemName, itemQuantity, itemImage.sprite);
-//            }
-//        }
-//    }
-//}
-//Them 27/3
-using PolyAndCode.UI;
+﻿using PolyAndCode.UI;
 using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.EventSystems;
@@ -99,30 +52,6 @@ public class InventoryCell : MonoBehaviour, ICell, IPointerClickHandler
         }
     }
 
-
-    //public void ConfigureCell(string itemName, int quantity)
-    //{
-    //    Debug.Log($"📦 ConfigureCell called: {itemName} x{quantity} on {gameObject.name}");
-
-    //    this.itemName = itemName;
-    //    this.itemQuantity = quantity;
-
-    //    if (itemNameText != null)
-    //        itemNameText.text = itemName;
-
-    //    if (quantityText != null)
-    //        quantityText.text = $"x{quantity}";
-
-    //    // KIỂM TRA BUTTON SAU KHI CONFIGURE
-    //    if (cellButton != null)
-    //    {
-    //        Debug.Log($"Button exists after configure: interactable={cellButton.interactable}");
-    //    }
-    //    else
-    //    {
-    //        Debug.LogError($"❌ Button is NULL after configure!");
-    //    }
-    //}
     public void ConfigureCell(string itemName, int quantity)
     {
         Debug.Log($"📦 ConfigureCell called: {itemName} x{quantity} on {gameObject.name}");

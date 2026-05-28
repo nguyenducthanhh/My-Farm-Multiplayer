@@ -140,7 +140,7 @@ public class NpcFishermanController : MonoBehaviour
         // Tạo bait item
         string baitItemName =baitItem.baitData.itemName;
         string baitDescription = playerInventory.itemDatabase?.GetDescription(baitItemName)
-                               ?? $"Mồi {baitItem.baitData.description}";
+                               ?? baitItem.baitData.description;
 
         InventoryItems newBait = new InventoryItems(
             baitItemName,                    // "worm_bait"

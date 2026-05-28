@@ -246,7 +246,7 @@ public class FishingController : MonoBehaviour
         SetPlayerMovementEnabled(true);
 
         Debug.Log($"✅ Thu thập được 1 {playerInventory.itemDatabase.GetDescription(caughtFish)}");
-
+        NotificationManager.ShowReward($"Câu được: {playerInventory.itemDatabase.GetDescription(caughtFish)}");
         SaveFishingDataToFirebase();
         UpdateUIStatus();
     }

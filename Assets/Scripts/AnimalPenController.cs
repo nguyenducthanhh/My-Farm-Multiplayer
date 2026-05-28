@@ -55,51 +55,6 @@ public class AnimalPenController : MonoBehaviour
         public bool canCollect;
     }
 
-    //private void Start()
-    //{
-    //    string penUnlockName = GetPenUnlockName(); // "chicken_pen", "pig_pen", etc.
-
-    //    Debug.Log($"🐷 Pen Unlock Name: {penUnlockName}");  // ← Thêm dòng này
-    //    Debug.Log($"🐷 Unlocked Items: {string.Join(", ", LevelSystem.Instance.GetUnlockedItems())}");  // ← Và dòng này
-
-    //    if (!LevelSystem.Instance.IsItemUnlocked(penUnlockName))
-    //    {
-    //        int requiredLevel = LevelSystem.Instance.GetRequiredLevelForItem(penUnlockName);
-    //        Debug.Log($"🔒 Chuồng chưa mở khóa! Cần cấp {requiredLevel}");
-
-    //        // ✅ Disable chuồng
-    //        gameObject.SetActive(false);
-    //        return;
-    //    }
-    //    if (feedButton != null)
-    //        feedButton.onClick.AddListener(OnFeedButtonClicked);
-
-    //    if (collectButton != null)
-    //        collectButton.onClick.AddListener(OnCollectButtonClicked);
-
-    //    uiPanel?.SetActive(false);
-
-    //    // ✅ Auto-find Animators nếu list trống
-    //    if (animalAnimators.Count == 0)
-    //    {
-    //        AutoFindAnimators();
-    //    }
-
-    //    // ✅ Kiểm tra Animators
-    //    if (animalAnimators.Count == 0)
-    //    {
-    //        Debug.LogError($"❌ No Animators found on {gameObject.name}!");
-    //    }
-    //    else
-    //    {
-    //        Debug.Log($"✅ Found {animalAnimators.Count} Animators");
-    //    }
-
-    //    LoadPenDataFromFirebase();
-    //    CheckFeedingStatus();
-
-    //    SetAllAnimalsState(false);  // ← Sleeping
-    //}
     private void Start()
     {
         // ✅ DELAY: Chờ LevelSystem load xong trước khi kiểm tra
@@ -261,13 +216,6 @@ public class AnimalPenController : MonoBehaviour
 
     private string GetPenUnlockName()
     {
-        //return animalType switch
-        //{
-        //    AnimalType.Chicken => "chicken_pen_1",
-        //    AnimalType.Pig => "pig_pen_1",
-        //    AnimalType.Cow => "cow_pen_1",
-        //    _ => "unknown_pen"
-        //};
         return penId;
     }
     private void ShowUI()
@@ -332,25 +280,7 @@ public class AnimalPenController : MonoBehaviour
 
     private void OnFeedButtonClicked()
     {
-        //if (!CanFeed())
-        //{
-        //    Debug.Log($"❌ Không đủ {GetFeedItemName()}!");
-        //    return;
-        //}
 
-        //playerInventory.RemoveInventoryItem($"{feedItemType}_fruit", feedQuantityRequired);
-
-        //isFeeding = true;
-        //canCollect = false;
-        //nextFeedTime = DateTime.UtcNow.AddSeconds(feedDuration);
-
-        //// ✅ Set tất cả con vật sang Eating
-        //SetAllAnimalsState(true);
-
-        //Debug.Log($"✅ {GetAnimalName()} bắt đầu ăn, sẽ xong sau {feedDuration}s");
-
-        //SavePenDataToFirebase();
-        //UpdateUIStatus();
         // ✅ Kiểm tra xem chuồng đã mở khóa chưa (QUAN TRỌNG)
         if (!penUnlocked)
         {
@@ -385,33 +315,7 @@ public class AnimalPenController : MonoBehaviour
 
     private void OnCollectButtonClicked()
     {
-        //if (!canCollect)
-        //{
-        //    Debug.Log("❌ Chưa có sản phẩm để thu thập!");
-        //    return;
-        //}
-
-        //string productName = $"{productItemType}_item";
-        //string productDescription = GetProductDescription();
-
-        //InventoryItems product = new InventoryItems(
-        //    productName,
-        //    productDescription,
-        //    1
-        //);
-
-        //playerInventory.AddInventoryItem(product);
-
-        //canCollect = false;
-        //isFeeding = false;
-
-        //// ✅ Set tất cả con vật về Sleeping
-        //SetAllAnimalsState(false);
-
-        //Debug.Log($"✅ Thu thập được 1 {productDescription}");
-
-        //SavePenDataToFirebase();
-        //UpdateUIStatus();
+ 
         // ✅ Kiểm tra xem chuồng đã mở khóa chưa (QUAN TRỌNG)
         if (!penUnlocked)
         {
