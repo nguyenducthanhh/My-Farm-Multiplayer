@@ -25,7 +25,7 @@ public class PlayerMovement : MonoBehaviour
     {
         rb = GetComponent<Rigidbody2D>();
         animator = GetComponent<Animator>();
-        playerCollider = GetComponent<Collider2D>();  // ✅ THÊM: Get collider
+        playerCollider = GetComponent<Collider2D>();
     }
 
     private void Start()
@@ -95,7 +95,7 @@ public class PlayerMovement : MonoBehaviour
     private void OnApplicationQuit()
     {
         SavePlayerPositionImmediately();
-        Debug.Log("💾 Game closed - position saved");
+        Debug.Log("Game closed - position saved");
     }
 
     private void SavePlayerPositionImmediately()
@@ -121,7 +121,7 @@ public class PlayerMovement : MonoBehaviour
         string positionJson = JsonConvert.SerializeObject(LoadDataManager.userInGame.LastPosition);
         userRef.SetRawJsonValueAsync(positionJson);
 
-        Debug.Log($"💾 Position saved: ({LoadDataManager.userInGame.LastPosition.x}, {LoadDataManager.userInGame.LastPosition.y})");
+        Debug.Log($" Position saved: ({LoadDataManager.userInGame.LastPosition.x}, {LoadDataManager.userInGame.LastPosition.y})");
     }
 
     public void SavePlayerPositionBeforeLogout()
@@ -154,7 +154,7 @@ public class PlayerMovement : MonoBehaviour
         {
             if (task.IsCompleted && !task.IsFaulted)
             {
-                Debug.Log($"💾 Position saved: ({LoadDataManager.userInGame.LastPosition.x}, {LoadDataManager.userInGame.LastPosition.y})");
+                Debug.Log($" Position saved: ({LoadDataManager.userInGame.LastPosition.x}, {LoadDataManager.userInGame.LastPosition.y})");
             }
         });
     }
@@ -163,7 +163,7 @@ public class PlayerMovement : MonoBehaviour
     {
         if (LoadDataManager.userInGame?.LastPosition == null)
         {
-            Debug.Log("⚠️ No saved position, using default (-0.5, -0.5)");
+            Debug.Log("No saved position, using default (-0.5, -0.5)");
             transform.position = new Vector3(-0.5f, -0.5f, 0f);
             return;
         }
@@ -178,6 +178,6 @@ public class PlayerMovement : MonoBehaviour
         loadedPosition = savedPosition;
         hasLoadedPosition = true;
         hasMovedAfterLoad = false;
-        Debug.Log($"✅ Position loaded: {savedPosition}");
+        Debug.Log($" Position loaded: {savedPosition}");
     }
 }

@@ -23,7 +23,6 @@ public class RecyclableInventory : MonoBehaviour, IRecyclableScrollRectDataSourc
     {
         Debug.Log($"RecyclableInventory on GameObject: {gameObject.name}");
 
-        //_recyclableScrollRect.DataSource = this;
         if (_recyclableScrollRect != null)
         {
             Debug.Log($"RecyclableScrollRect on GameObject: {_recyclableScrollRect.gameObject.name}");
@@ -69,19 +68,17 @@ public class RecyclableInventory : MonoBehaviour, IRecyclableScrollRectDataSourc
     {
         if (UsernameWizard.IsEnteringUsername)
         {
-            return; // Bỏ qua input B
+            return;
         }
         if (Input.GetKeyDown(KeyCode.B))
         {
-            // NẾU ĐANG MỞ INVENTORY → ĐÓNG VÀ CANCEL SLOT SELECTION
             if (inventoryGameObject.activeSelf)
             {
-                // Đóng slot selection panel nếu đang mở
                 var farmController = FindObjectOfType<PlayerFarmController>();
                 if (farmController != null)
                 {
                     farmController.CancelSlotSelection();
-                    Debug.Log("🚫 Auto-cancelled slot selection when closing inventory");
+                    Debug.Log("Auto-cancelled slot selection when closing inventory");
                 }
             }
 
@@ -102,8 +99,7 @@ public class RecyclableInventory : MonoBehaviour, IRecyclableScrollRectDataSourc
 
     public void SetCell(ICell cell, int index)
     {
-        //var item = cell as CelltemData;
-        //item.ConfigureCell(_invenItems[index], index);
+   
         if (cell == null)
         {
             Debug.LogError("Cell is null in SetCell!");
@@ -128,7 +124,6 @@ public class RecyclableInventory : MonoBehaviour, IRecyclableScrollRectDataSourc
             return;
         }
         data.description = itemDatabase.GetDescription(data.name);
-        //item.ConfigureCell(data.description, data.quantity);
         item.ConfigureCell(data.name, data.quantity);
         LoadSpriteForItem(data, item);
 
@@ -187,8 +182,7 @@ public class RecyclableInventory : MonoBehaviour, IRecyclableScrollRectDataSourc
             Debug.LogError("Item is null!");
             return;
         }
-        //_invenItems.Add(item);
-        //needReload = true;
+  
 
         var existingItem = _invenItems.Find(i => i.name == item.name);
         if (existingItem != null)
@@ -310,7 +304,6 @@ public class RecyclableInventory : MonoBehaviour, IRecyclableScrollRectDataSourc
                             LoadDataManager.userInGame.Inventory = _invenItems;
                         }
 
-                        // _recyclableScrollRect.ReloadData();
                         if (gameObject.activeInHierarchy && _recyclableScrollRect != null)
                         {
                             _recyclableScrollRect.ReloadData();

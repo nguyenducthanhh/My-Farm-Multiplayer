@@ -57,110 +57,12 @@ public class LoadDataManager : MonoBehaviour
         LastPositionWasRepaired = false;
         hasCompletedCurrentLoad = false;
 
-        // Khởi tạo User object trống trước
         userInGame = new User();
 
-        // Load từng field riêng biệt
         LoadUserDataParts();
     }
 
-    //private void LoadUserDataParts()
-    //{
-    //    var userRef = reference.Child("Users").Child(firebaseUser.UserId);
-    //    int loadedPartsCount = 0;
-    //    int totalParts = 4; // Name, Gold, MapInGame, Inventory
-
-    //    // Load Name
-    //    userRef.Child("Name").GetValueAsync().ContinueWithOnMainThread(task =>
-    //    {
-    //        if (task.IsCompleted && task.Result.Value != null)
-    //        {
-    //            userInGame.Name = task.Result.Value.ToString();
-    //            Debug.Log($"✅ Name loaded: '{userInGame.Name}'");
-    //        }
-    //        else
-    //        {
-    //            userInGame.Name = "";
-    //            Debug.Log("⚠️ Name not found, using default empty string");
-    //        }
-
-    //        loadedPartsCount++;
-    //        CheckLoadComplete(loadedPartsCount, totalParts);
-    //    });
-
-    //    // Load Gold
-    //    userRef.Child("Gold").GetValueAsync().ContinueWithOnMainThread(task =>
-    //    {
-    //        if (task.IsCompleted && task.Result.Value != null)
-    //        {
-    //            userInGame.Gold = Convert.ToInt32(task.Result.Value);
-    //            Debug.Log($"✅ Gold loaded: {userInGame.Gold}");
-    //        }
-    //        else
-    //        {
-    //            userInGame.Gold = 100;
-    //            Debug.Log("⚠️ Gold not found, using default 100");
-    //        }
-
-    //        loadedPartsCount++;
-    //        CheckLoadComplete(loadedPartsCount, totalParts);
-    //    });
-
-    //    // Load MapInGame
-    //    userRef.Child("MapInGame").GetValueAsync().ContinueWithOnMainThread(task =>
-    //    {
-    //        if (task.IsCompleted && task.Result.Value != null)
-    //        {
-    //            try
-    //            {
-    //                string mapJson = task.Result.GetRawJsonValue();
-    //                userInGame.MapInGame = JsonConvert.DeserializeObject<Map>(mapJson);
-    //                Debug.Log($"✅ Map loaded with {userInGame.MapInGame?.lstTilemapDetail?.Count ?? 0} tiles");
-    //            }
-    //            catch (Exception e)
-    //            {
-    //                Debug.LogError($"❌ Error parsing MapInGame: {e.Message}");
-    //                userInGame.MapInGame = CreateDefaultMap();
-    //            }
-    //        }
-    //        else
-    //        {
-    //            Debug.Log("⚠️ MapInGame not found, creating default");
-    //            userInGame.MapInGame = CreateDefaultMap();
-    //        }
-
-    //        loadedPartsCount++;
-    //        CheckLoadComplete(loadedPartsCount, totalParts);
-    //    });
-
-    //    // Load Inventory
-    //    userRef.Child("Inventory").GetValueAsync().ContinueWithOnMainThread(task =>
-    //    {
-    //        if (task.IsCompleted && task.Result.Value != null)
-    //        {
-    //            try
-    //            {
-    //                string inventoryJson = task.Result.GetRawJsonValue();
-    //                userInGame.Inventory = JsonConvert.DeserializeObject<List<InventoryItems>>(inventoryJson);
-    //                Debug.Log($"✅ Inventory loaded with {userInGame.Inventory?.Count ?? 0} items");
-    //            }
-    //            catch (Exception e)
-    //            {
-    //                Debug.LogError($"❌ Error parsing Inventory: {e.Message}");
-    //                userInGame.Inventory = new List<InventoryItems>();
-    //            }
-    //        }
-    //        else
-    //        {
-    //            Debug.Log("⚠️ Inventory not found, using empty list");
-    //            userInGame.Inventory = new List<InventoryItems>();
-    //        }
-
-    //        loadedPartsCount++;
-    //        CheckLoadComplete(loadedPartsCount, totalParts);
-    //    });
-    //}
-
+ 
     private void LoadUserDataParts()
     {
         var userRef = reference.Child("Users").Child(firebaseUser.UserId);
@@ -373,24 +275,24 @@ public class LoadDataManager : MonoBehaviour
                 {
                     string rewardJson = task.Result.GetRawJsonValue();
                     userInGame.DailyReward = JsonConvert.DeserializeObject<User.DailyRewardData>(rewardJson);
-                    Debug.Log($"✅ DailyReward loaded:");
+                    Debug.Log($"   DailyReward loaded:");
                     Debug.Log($"   Last Daily Claim: {userInGame.DailyReward.lastDailyClaimDate}");
                     Debug.Log($"   Last Ranking Claim: {userInGame.DailyReward.lastRankingRewardDate}");
                     Debug.Log($"   Last Saved Snapshot: {userInGame.DailyReward.lastSavedSnapshotDate}");
                 }
                 catch (Exception e)
                 {
-                    Debug.LogError($"❌ Error parsing DailyReward: {e.Message}");
+                    Debug.LogError($" Error parsing DailyReward: {e.Message}");
                     userInGame.DailyReward = new User.DailyRewardData();
                 }
             }
             else if (task.IsFaulted || task.IsCanceled)
             {
-                Debug.LogError($"❌ Failed to load DailyReward, keeping local default and not saving over Firebase: {task.Exception}");
+                Debug.LogError($" Failed to load DailyReward, keeping local default and not saving over Firebase: {task.Exception}");
             }
             else
             {
-                Debug.Log("⚠️ DailyReward not found, using default");
+                Debug.Log(" DailyReward not found, using default");
                 userInGame.DailyReward = new User.DailyRewardData();
             }
 
@@ -403,16 +305,16 @@ public class LoadDataManager : MonoBehaviour
             if (task.IsCompleted && !task.IsFaulted && task.Result.Value != null)
             {
                 userInGame.Name = task.Result.Value.ToString();
-                Debug.Log($"✅ Name loaded: '{userInGame.Name}'");
+                Debug.Log($" Name loaded: '{userInGame.Name}'");
             }
             else if (task.IsFaulted || task.IsCanceled)
             {
-                Debug.LogError($"❌ Failed to load Name, keeping local default and not saving over Firebase: {task.Exception}");
+                Debug.LogError($" Failed to load Name, keeping local default and not saving over Firebase: {task.Exception}");
             }
             else
             {
                 userInGame.Name = "";
-                Debug.Log("⚠️ Name not found, using default empty string");
+                Debug.Log(" Name not found, using default empty string");
             }
 
             loadedPartsCount++;
@@ -424,16 +326,16 @@ public class LoadDataManager : MonoBehaviour
             if (task.IsCompleted && !task.IsFaulted && task.Result.Value != null)
             {
                 userInGame.Gold = Convert.ToInt32(task.Result.Value);
-                Debug.Log($"✅ Gold loaded: {userInGame.Gold}");
+                Debug.Log($" Gold loaded: {userInGame.Gold}");
             }
             else if (task.IsFaulted || task.IsCanceled)
             {
-                Debug.LogError($"❌ Failed to load Gold, keeping local default and not saving over Firebase: {task.Exception}");
+                Debug.LogError($" Failed to load Gold, keeping local default and not saving over Firebase: {task.Exception}");
             }
             else
             {
                 userInGame.Gold = 100;
-                Debug.Log("⚠️ Gold not found, using default 100");
+                Debug.Log(" Gold not found, using default 100");
             }
 
             loadedPartsCount++;
@@ -449,22 +351,22 @@ public class LoadDataManager : MonoBehaviour
                     string posJson = task.Result.GetRawJsonValue();
                     userInGame.LastPosition = JsonConvert.DeserializeObject<User.PlayerPosition>(posJson);
                     userInGame.LastPosition ??= CreateDefaultSpawnPosition();
-                    Debug.Log($"✅ LastPosition loaded: ({userInGame.LastPosition.x}, {userInGame.LastPosition.y}, {userInGame.LastPosition.z})");
+                    Debug.Log($" LastPosition loaded: ({userInGame.LastPosition.x}, {userInGame.LastPosition.y}, {userInGame.LastPosition.z})");
                 }
                 catch (Exception e)
                 {
-                    Debug.LogError($"❌ Error parsing LastPosition: {e.Message}");
+                    Debug.LogError($" Error parsing LastPosition: {e.Message}");
                     userInGame.LastPosition = CreateDefaultSpawnPosition();
                     LastPositionWasRepaired = true;
                 }
             }
             else if (task.IsFaulted || task.IsCanceled)
             {
-                Debug.LogError($"❌ Failed to load LastPosition, keeping local default and not saving over Firebase: {task.Exception}");
+                Debug.LogError($" Failed to load LastPosition, keeping local default and not saving over Firebase: {task.Exception}");
             }
             else
             {
-                Debug.Log("⚠️ LastPosition not found, using default spawn position");
+                Debug.Log(" LastPosition not found, using default spawn position");
                 userInGame.LastPosition = CreateDefaultSpawnPosition();
                 LastPositionWasRepaired = true;
             }
@@ -481,21 +383,21 @@ public class LoadDataManager : MonoBehaviour
                 {
                     string mapJson = task.Result.GetRawJsonValue();
                     userInGame.MapInGame = JsonConvert.DeserializeObject<Map>(mapJson);
-                    Debug.Log($"✅ Map loaded with {userInGame.MapInGame?.lstTilemapDetail?.Count ?? 0} tiles");
+                    Debug.Log($" Map loaded with {userInGame.MapInGame?.lstTilemapDetail?.Count ?? 0} tiles");
                 }
                 catch (Exception e)
                 {
-                    Debug.LogError($"❌ Error parsing MapInGame: {e.Message}");
+                    Debug.LogError($" Error parsing MapInGame: {e.Message}");
                     userInGame.MapInGame = CreateDefaultMap();
                 }
             }
             else if (task.IsFaulted || task.IsCanceled)
             {
-                Debug.LogError($"❌ Failed to load MapInGame, keeping local default and not saving over Firebase: {task.Exception}");
+                Debug.LogError($" Failed to load MapInGame, keeping local default and not saving over Firebase: {task.Exception}");
             }
             else
             {
-                Debug.Log("⚠️ MapInGame not found, creating default");
+                Debug.Log(" MapInGame not found, creating default");
                 userInGame.MapInGame = CreateDefaultMap();
             }
 
@@ -517,33 +419,33 @@ public class LoadDataManager : MonoBehaviour
                     if (inventoryJson.StartsWith("["))
                     {
                         userInGame.Inventory = JsonConvert.DeserializeObject<List<InventoryItems>>(inventoryJson);
-                        Debug.Log($"✅ Inventory loaded as array with {userInGame.Inventory?.Count ?? 0} items");
+                        Debug.Log($" Inventory loaded as array with {userInGame.Inventory?.Count ?? 0} items");
                     }
                     else if (inventoryJson.StartsWith("{"))
                     {
-                        Debug.LogWarning("⚠️ Inventory is JSON Object, not auto-fixing Firebase during load.");
+                        Debug.LogWarning(" Inventory is JSON Object, not auto-fixing Firebase during load.");
                         var dictInventory = JsonConvert.DeserializeObject<Dictionary<string, object>>(inventoryJson);
                         Debug.Log($"Inventory object keys: {string.Join(", ", dictInventory.Keys)}");
                     }
                     else
                     {
-                        Debug.LogWarning($"⚠️ Unknown inventory format: {inventoryJson}");
+                        Debug.LogWarning($" Unknown inventory format: {inventoryJson}");
                     }
                 }
                 catch (Exception e)
                 {
-                    Debug.LogError($"❌ Error parsing Inventory: {e.Message}");
+                    Debug.LogError($" Error parsing Inventory: {e.Message}");
                     Debug.LogError($"Inventory JSON causing error: {task.Result.GetRawJsonValue()}");
-                    Debug.LogWarning("⚠️ Inventory was not fixed automatically to avoid overwriting existing Firebase data during load.");
+                    Debug.LogWarning(" Inventory was not fixed automatically to avoid overwriting existing Firebase data during load.");
                 }
             }
             else if (task.IsFaulted || task.IsCanceled)
             {
-                Debug.LogError($"❌ Failed to load Inventory, keeping local default and not saving over Firebase: {task.Exception}");
+                Debug.LogError($" Failed to load Inventory, keeping local default and not saving over Firebase: {task.Exception}");
             }
             else
             {
-                Debug.Log("⚠️ Inventory not found, using empty list");
+                Debug.Log(" Inventory not found, using empty list");
             }
 
             loadedPartsCount++;
@@ -566,11 +468,11 @@ public class LoadDataManager : MonoBehaviour
             {
                 if (task.IsCompleted)
                 {
-                    Debug.Log("✅ Inventory format fixed on Firebase");
+                    Debug.Log(" Inventory format fixed on Firebase");
                 }
                 else
                 {
-                    Debug.LogError("❌ Failed to fix inventory format: " + task.Exception);
+                    Debug.LogError(" Failed to fix inventory format: " + task.Exception);
                 }
             });
     }
@@ -583,7 +485,7 @@ public class LoadDataManager : MonoBehaviour
             hasCompletedCurrentLoad = true;
             IsUserDataLoaded = true;
 
-            Debug.Log("🎉 ALL USER DATA LOADED SUCCESSFULLY!");
+            Debug.Log(" ALL USER DATA LOADED SUCCESSFULLY!");
             Debug.Log($"Final User Data - Name: '{userInGame.Name}', Gold: {userInGame.Gold}");
             Debug.Log($"Map: {(userInGame.MapInGame != null ? "Available" : "NULL")}");
             Debug.Log($"Inventory: {userInGame.Inventory?.Count ?? 0} items");

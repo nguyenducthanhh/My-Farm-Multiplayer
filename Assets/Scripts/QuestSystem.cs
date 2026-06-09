@@ -31,7 +31,6 @@ public class QuestSystem : MonoBehaviour
         }
     }
 
-    // ✅ Event khi quest hoàn thành
     public delegate void OnQuestCompletedHandler(QuestConfig.Quest quest);
     public static event OnQuestCompletedHandler OnQuestCompleted;
 
@@ -44,11 +43,11 @@ public class QuestSystem : MonoBehaviour
 
         if (questConfig == null)
         {
-            Debug.LogError("❌ QuestConfig NOT ASSIGNED!");
+            Debug.LogError(" QuestConfig NOT ASSIGNED!");
             return;
         }
 
-        Debug.Log($"✅ QuestConfig loaded: {questConfig.allQuests.Count} quests");
+        Debug.Log($" QuestConfig loaded: {questConfig.allQuests.Count} quests");
 
 
         StartCoroutine(WaitForUserDataAndLoadQuests());
@@ -72,7 +71,6 @@ public class QuestSystem : MonoBehaviour
         LoadQuestDataFromFirebase();
     }
 
-    // ✅ Cấp tiến các quest (xóa quest trước, thêm quest mới)
     public void AdvanceQuests()
     {
         if (activeQuests.Count < 4)
@@ -85,17 +83,16 @@ public class QuestSystem : MonoBehaviour
     {
         if (questConfig == null || questConfig.allQuests.Count == 0) return;
 
-        // ✅ Tìm quest chưa hoàn thành và chưa active
+        //  Tìm quest chưa hoàn thành và chưa active
         foreach (var quest in questConfig.allQuests)
         {
             if (!completedQuestIds.Contains(quest.questId) && !IsQuestActive(quest.questId))
             {
-                // ✅ XÓA kiểm tra cấp độ - tất cả quest bây giờ đều có thể làm
                 activeQuests.Enqueue(quest);
-                Debug.Log($"📋 Added quest: {quest.questName}");
+                Debug.Log($" Added quest: {quest.questName}");
 
                 if (activeQuests.Count < 4)
-                    AdvanceQuests();  // ← Đệ quy thêm quest cho đủ 4 cái
+                    AdvanceQuests();  //  Đệ quy thêm quest cho đủ 4 cái
                 return;
             }
         }
@@ -110,7 +107,6 @@ public class QuestSystem : MonoBehaviour
         return false;
     }
 
-    // ✅ Kiểm tra quest có thể hoàn thành không
     public bool CanCompleteQuest(QuestConfig.Quest quest, RecyclableInventory inventory)
     {
         if (quest == null || inventory == null) return false;
@@ -120,88 +116,37 @@ public class QuestSystem : MonoBehaviour
             int quantity = inventory.GetItemQuantity(requirement.itemName);
             if (quantity < requirement.quantity)
             {
-                Debug.Log($"❌ Không đủ {requirement.itemName}! Cần {requirement.quantity}, có {quantity}");
+                Debug.Log($" Không đủ {requirement.itemName}! Cần {requirement.quantity}, có {quantity}");
                 return false;
             }
         }
 
         return true;
     }
-
-    // ✅ Hoàn thành quest
-    //public void CompleteQuest(QuestConfig.Quest quest, RecyclableInventory inventory)
-    //{
-    //    if (!CanCompleteQuest(quest, inventory)) return;
-
-    //    // ✅ Trừ items từ inventory
-    //    foreach (var requirement in quest.requirements)
-    //    {
-    //        inventory.RemoveInventoryItem(requirement.itemName, requirement.quantity);
-    //        Debug.Log($"✅ Trừ {requirement.quantity}x {requirement.itemName}");
-    //    }
-
-    //    // ✅ Trao thưởng
-    //    if (quest.rewardGold > 0)
-    //    {
-    //        LoadDataManager.userInGame.Gold += quest.rewardGold;
-    //        Debug.Log($"💰 +{quest.rewardGold} Gold");
-    //    }
-
-    //    if (quest.rewardExperience > 0)
-    //    {
-    //        LevelSystem.Instance.AddExperience(quest.rewardExperience);
-    //        Debug.Log($"⭐ +{quest.rewardExperience} XP");
-    //    }
-
-    //    // ✅ Đánh dấu hoàn thành
-    //    completedQuestIds.Add(quest.questId);
-
-    //    // ✅ Xóa quest khỏi active list
-    //    var tempQueue = new Queue<QuestConfig.Quest>();
-    //    while (activeQuests.Count > 0)
-    //    {
-    //        var q = activeQuests.Dequeue();
-    //        if (q.questId != quest.questId)
-    //            tempQueue.Enqueue(q);
-    //    }
-    //    activeQuests = tempQueue;
-
-    //    // ✅ Thêm quest mới
-    //    AdvanceQuests();
-
-    //    // ✅ Broadcast event
-    //    OnQuestCompleted?.Invoke(quest);
-
-    //    SaveQuestDataToFirebase();
-    //}
     public void CompleteQuest(QuestConfig.Quest quest, RecyclableInventory inventory)
     {
         if (!CanCompleteQuest(quest, inventory)) return;
 
-        // ✅ Trừ items từ inventory
         foreach (var requirement in quest.requirements)
         {
             inventory.RemoveInventoryItem(requirement.itemName, requirement.quantity);
-            Debug.Log($"✅ Trừ {requirement.quantity}x {requirement.itemName}");
+            Debug.Log($" Trừ {requirement.quantity}x {requirement.itemName}");
         }
 
-        // ✅ Trao thưởng
         if (quest.rewardGold > 0)
         {
             LoadDataManager.userInGame.Gold += quest.rewardGold;
-            Debug.Log($"💰 +{quest.rewardGold} Gold");
+            Debug.Log($" +{quest.rewardGold} Gold");
         }
 
         if (quest.rewardExperience > 0)
         {
             LevelSystem.Instance.AddExperience(quest.rewardExperience);
-            Debug.Log($"⭐ +{quest.rewardExperience} XP");
+            Debug.Log($" +{quest.rewardExperience} XP");
         }
 
-        // ✅ Đánh dấu hoàn thành
         completedQuestIds.Add(quest.questId);
 
-        // ✅ Xóa quest khỏi active list
         var tempQueue = new Queue<QuestConfig.Quest>();
         while (activeQuests.Count > 0)
         {
@@ -211,20 +156,15 @@ public class QuestSystem : MonoBehaviour
         }
         activeQuests = tempQueue;
 
-        // ✅ Thêm quest mới
         AdvanceQuests();
 
-        // ✅ Broadcast event
         OnQuestCompleted?.Invoke(quest);
 
-        // ✅ Save quest data
         SaveQuestDataToFirebase();
 
-        // ✅ THÊM: Save gold lên Firebase
         SaveGoldToFirebase();
     }
 
-    // ✅ THÊM: Hàm mới để save gold
     private void SaveGoldToFirebase()
     {
         if (LoadDataManager.firebaseUser == null) return;
@@ -238,18 +178,16 @@ public class QuestSystem : MonoBehaviour
             {
                 if (task.IsCompleted && !task.IsFaulted)
                 {
-                    Debug.Log($"✅ Gold saved to Firebase: {LoadDataManager.userInGame.Gold}");
+                    Debug.Log($" Gold saved to Firebase: {LoadDataManager.userInGame.Gold}");
                 }
                 else
                 {
-                    Debug.LogError($"❌ Failed to save gold: {task.Exception}");
+                    Debug.LogError($" Failed to save gold: {task.Exception}");
                 }
             });
     }
-    // ✅ Getter
     public Queue<QuestConfig.Quest> GetActiveQuests() => activeQuests;
     public int GetActiveQuestCount() => activeQuests.Count;
-
     private void LoadQuestDataFromFirebase()
     {
         if (LoadDataManager.firebaseUser == null)
@@ -276,7 +214,6 @@ public class QuestSystem : MonoBehaviour
                         {
                             completedQuestIds = questData.completedQuestIds;
 
-                            // ✅ Load active quests
                             foreach (var questId in questData.activeQuestIds)
                             {
                                 var quest = questConfig.allQuests.Find(q => q.questId == questId);
@@ -284,7 +221,7 @@ public class QuestSystem : MonoBehaviour
                                     activeQuests.Enqueue(quest);
                             }
 
-                            Debug.Log($"✅ Loaded quests: {activeQuests.Count} active, {completedQuestIds.Count} completed");
+                            Debug.Log($" Loaded quests: {activeQuests.Count} active, {completedQuestIds.Count} completed");
                         }
                     }
                     catch (Exception e)
@@ -302,14 +239,42 @@ public class QuestSystem : MonoBehaviour
                     Debug.Log("No quest data found, initializing...");
                     InitializeQuests();
                 }
-                Debug.Log($"📊 Active quests after load: {activeQuests.Count}");
 
+                CheckForNewQuests();
+
+                Debug.Log($" Active quests after load: {activeQuests.Count}");
             });
+    }
+
+    private void CheckForNewQuests()
+    {
+        if (questConfig == null || questConfig.allQuests.Count == 0) return;
+
+        int newQuestsAdded = 0;
+
+        foreach (var questInAsset in questConfig.allQuests)
+        {
+            if (!completedQuestIds.Contains(questInAsset.questId) && !IsQuestActive(questInAsset.questId))
+            {
+                activeQuests.Enqueue(questInAsset);
+                newQuestsAdded++;
+                Debug.Log($" Added new quest from asset: {questInAsset.questName}");
+            }
+        }
+
+        if (newQuestsAdded > 0)
+        {
+            Debug.Log($" {newQuestsAdded} quest(s) mới được thêm từ asset");
+            SaveQuestDataToFirebase();
+        }
+        else
+        {
+            Debug.Log("No new quests found in asset");
+        }
     }
 
     private void InitializeQuests()
     {
-        // ✅ Thêm 4 quest đầu tiên
         for (int i = 0; i < 4; i++)
         {
             AdvanceQuests();

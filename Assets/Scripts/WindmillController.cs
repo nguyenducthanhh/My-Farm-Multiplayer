@@ -9,10 +9,10 @@ public class WindmillController : MonoBehaviour
 {
     [Header("Windmill Settings")]
     [SerializeField] private string millId = "windmill_1";
-    [SerializeField] private int grainRequiredPerMill = 2;              // 2 lúa
-    [SerializeField] private string grainItemType = "Paddy";           // Loại lúa cần
-    [SerializeField] private float millingDuration = 180f;             // 180 giây
-    [SerializeField] private string flourProductType = "flour";        // Sản phẩm: bột mì
+    [SerializeField] private int grainRequiredPerMill = 2;             
+    [SerializeField] private string grainItemType = "Paddy";         
+    [SerializeField] private float millingDuration = 180f;           
+    [SerializeField] private string flourProductType = "flour";       
 
     [Header("UI References")]
     [SerializeField] private Button millButton;
@@ -74,7 +74,6 @@ public class WindmillController : MonoBehaviour
 
         UpdateUIStatus();
 
-        // ✅ Kiểm tra nếu hết millingDuration
         if (isMilling && DateTime.UtcNow >= nextMillingTime)
         {
             isMilling = false;
@@ -103,7 +102,6 @@ public class WindmillController : MonoBehaviour
     {
         if (canCollect)
         {
-            // ✅ Sẵn sàng thu thập
             if (millButton != null)
                 millButton.gameObject.SetActive(false);
 
@@ -112,7 +110,6 @@ public class WindmillController : MonoBehaviour
         }
         else if (isMilling)
         {
-            // ✅ Đang xay
             if (millButton != null)
                 millButton.gameObject.SetActive(false);
 
@@ -121,7 +118,6 @@ public class WindmillController : MonoBehaviour
         }
         else
         {
-            // ✅ Sẵn sàng để xay
             if (millButton != null)
                 millButton.gameObject.SetActive(true);
 
@@ -134,18 +130,18 @@ public class WindmillController : MonoBehaviour
     {
         if (!CanMill())
         {
-            Debug.Log($"❌ Không đủ {grainItemType}! Cần {grainRequiredPerMill}, hiện có {GetGrainQuantity()}");
+            Debug.Log($" Không đủ {grainItemType}! Cần {grainRequiredPerMill}, hiện có {GetGrainQuantity()}");
+            NotificationManager.ShowReward($"Không đủ Lúa! Cần {grainRequiredPerMill}, hiện có {GetGrainQuantity()}");
             return;
         }
 
-        // ✅ Trừ 2 lúa từ inventory
         playerInventory.RemoveInventoryItem($"{grainItemType}_fruit", grainRequiredPerMill);
 
         isMilling = true;
         canCollect = false;
         nextMillingTime = DateTime.UtcNow.AddSeconds(millingDuration);
 
-        Debug.Log($"✅ Cối xay đang xay {grainRequiredPerMill} lúa, sẽ xong sau {millingDuration}s");
+        Debug.Log($" Cối xay đang xay {grainRequiredPerMill} lúa, sẽ xong sau {millingDuration}s");
 
         SaveMillDataToFirebase();
         UpdateUIStatus();
@@ -155,11 +151,10 @@ public class WindmillController : MonoBehaviour
     {
         if (!canCollect)
         {
-            Debug.Log("❌ Chưa có bột mì để thu thập!");
+            Debug.Log(" Chưa có bột mì để thu thập!");
             return;
         }
 
-        // ✅ Tạo bột mì và thêm vào inventory (1 bột mì)
         string flourItemName = $"{flourProductType}_item";
         string flourDescription = "Bột mì";
 
@@ -174,8 +169,8 @@ public class WindmillController : MonoBehaviour
         canCollect = false;
         isMilling = false;
 
-        Debug.Log($"✅ Thu thập được 1 bột mì");
-
+        Debug.Log($" Thu thập được 1 bột mì");
+        NotificationManager.ShowReward("Bạn thu thập được 1 bột mì!");
         SaveMillDataToFirebase();
         UpdateUIStatus();
     }
@@ -236,7 +231,7 @@ public class WindmillController : MonoBehaviour
                             nextMillingTime = new DateTime(millData.nextMillingTimeTicks, DateTimeKind.Utc);
                             canCollect = millData.canCollect;
 
-                            Debug.Log($"✅ Loaded mill data: isMilling={isMilling}, canCollect={canCollect}");
+                            Debug.Log($" Loaded mill data: isMilling={isMilling}, canCollect={canCollect}");
 
                             CheckMillingStatus();
                         }
@@ -281,7 +276,7 @@ public class WindmillController : MonoBehaviour
             {
                 if (task.IsCompleted)
                 {
-                    Debug.Log($"✅ Saved mill data: {millId}");
+                    Debug.Log($" Saved mill data: {millId}");
                 }
                 else
                 {

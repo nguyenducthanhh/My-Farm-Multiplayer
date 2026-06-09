@@ -47,8 +47,6 @@ public class TileMapManager : MonoBehaviour
             LoadMapForUser();
         }
 
-        //FirebaseApp app = FirebaseApp.DefaultInstance;
-
         playerFarmController.LoadPlantsFromFirebase();
 
         StartCoroutine(PlantUpdateLoop());
@@ -113,7 +111,7 @@ public class TileMapManager : MonoBehaviour
                 FirebaseDatabase.DefaultInstance
                     .GetReference("Users")
                     .Child(LoadDataManager.firebaseUser.UserId)
-                    .Child("MapInGame")  // ← Chỉ lưu Map
+                    .Child("MapInGame") 
                     .SetRawJsonValueAsync(mapJson)
                     .ContinueWithOnMainThread(task =>
                     {

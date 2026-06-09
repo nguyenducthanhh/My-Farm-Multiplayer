@@ -40,7 +40,7 @@ public class LeaderboardManager : MonoBehaviour
     private bool isLevelLeaderboardActive = true;
     private bool isRefreshingLeaderboard = false;
 
-    // ✅ Cache leaderboard data
+    //  Cache leaderboard data
     private List<LeaderboardEntry> cachedLevelLeaderboard = new List<LeaderboardEntry>();
     private List<LeaderboardEntry> cachedQuestLeaderboard = new List<LeaderboardEntry>();
 
@@ -95,7 +95,7 @@ public class LeaderboardManager : MonoBehaviour
         else if (instance != this)
             Destroy(gameObject);
 
-        // ✅ Setup button listeners
+        //  Setup button listeners
         if (levelLeaderboardButton != null)
             levelLeaderboardButton.onClick.AddListener(ShowLevelLeaderboard);
         if (questLeaderboardButton != null)
@@ -108,7 +108,7 @@ public class LeaderboardManager : MonoBehaviour
         if (leaderboardPanel != null)
             leaderboardPanel.SetActive(false);
 
-        // ✅ Tạo sẵn entry UI
+        //  Tạo sẵn entry UI
         for (int i = 0; i < maxLeaderboardEntries; i++)
         {
             var entry = Instantiate(leaderboardEntryPrefab, levelContentTransform);
@@ -121,7 +121,6 @@ public class LeaderboardManager : MonoBehaviour
             questDisplayedEntries.Add(entry);
         }
 
-        // ✅ Auto-load leaderboard từ Firebase khi game start
         StartCoroutine(LoadAndCacheLeaderboardFromFirebase());
     }
 
@@ -182,29 +181,22 @@ public class LeaderboardManager : MonoBehaviour
         DisplayQuestLeaderboard(cachedQuestLeaderboard);
     }
 
-    /// <summary>
-    /// ✅ THÊM: Load leaderboard từ Firebase
-    /// </summary>
     private IEnumerator LoadAndCacheLeaderboardFromFirebase()
     {
         string today = System.DateTime.UtcNow.ToString("yyyy-MM-dd");
 
-        Debug.Log($"📥 Loading leaderboard from Firebase for {today}...");
+        Debug.Log($" Loading leaderboard from Firebase for {today}...");
 
-        // Load Level Leaderboard
         yield return StartCoroutine(LoadLeaderboardFromFirebase(today, "levelRanking",
             (entries) => cachedLevelLeaderboard = entries));
 
-        // Load Quest Leaderboard
         yield return StartCoroutine(LoadLeaderboardFromFirebase(today, "questRanking",
             (entries) => cachedQuestLeaderboard = entries));
 
-        Debug.Log($"✅ Leaderboard cached successfully!");
+        Debug.Log($" Leaderboard cached successfully!");
     }
 
-    /// <summary>
-    /// ✅ THÊM: Load từng loại leaderboard từ Firebase
-    /// </summary>
+
     private IEnumerator LoadLeaderboardFromFirebase(string date, string rankType, System.Action<List<LeaderboardEntry>> callback)
     {
         bool isLoaded = false;
@@ -225,7 +217,6 @@ public class LeaderboardManager : MonoBehaviour
                             task.Result.GetRawJsonValue()
                         );
 
-                        // Parse data từ snapshot
                         foreach (var kvp in snapshotData)
                         {
                             string playerId = kvp.Key;
@@ -239,8 +230,7 @@ public class LeaderboardManager : MonoBehaviour
                             );
                             entries.Add(entry);
                         }
-
-                        // Sort theo điểm thực tế rồi tự tính lại rank để tránh dữ liệu rank cũ/-1 trên Firebase.
+                        // sắp xếp lại
                         entries = entries
                             .OrderByDescending(e => e.value)
                             .ThenBy(e => e.playerName)
@@ -252,17 +242,16 @@ public class LeaderboardManager : MonoBehaviour
                             entries[i].rank = i + 1;
                         }
 
-                        Debug.Log($"✅ {rankType} loaded from Firebase: {entries.Count} entries");
+                        Debug.Log($" {rankType} loaded from Firebase: {entries.Count} entries");
                     }
                     catch (Exception e)
                     {
-                        Debug.LogError($"❌ Error parsing {rankType}: {e.Message}");
+                        Debug.LogError($" Error parsing {rankType}: {e.Message}");
                     }
                 }
                 else
                 {
-                    Debug.LogWarning($"⚠️ No {rankType} found in Firebase for {date}, will load from users...");
-                    // Fallback: Load từ Users nếu không có trong Leaderboard/CurrentDaily
+                    Debug.LogWarning($" No {rankType} found in Firebase for {date}, will load from users...");
                 }
 
                 isLoaded = true;
@@ -272,17 +261,13 @@ public class LeaderboardManager : MonoBehaviour
         callback?.Invoke(entries);
     }
 
-    /// <summary>
-    /// ✅ THÊM: Save leaderboard vào Firebase
-    /// Gọi từ DailyRewardSystem lúc reward time
-    /// </summary>
+
     public IEnumerator SaveLeaderboardToFirebase()
     {
         string today = System.DateTime.UtcNow.ToString("yyyy-MM-dd");
 
-        Debug.Log($"💾 Saving current leaderboard to Firebase for {today}...");
+        Debug.Log($" Saving current leaderboard to Firebase for {today}...");
 
-        // Tạo snapshot
         var leaderboardSnapshot = new LeaderboardSnapshot
         {
             snapshotDate = today,
@@ -291,7 +276,6 @@ public class LeaderboardManager : MonoBehaviour
             questRanking = new Dictionary<string, LeaderboardRankEntry>()
         };
 
-        // Save Level Ranking
         for (int i = 0; i < cachedLevelLeaderboard.Count; i++)
         {
             var entry = cachedLevelLeaderboard[i];
@@ -304,7 +288,6 @@ public class LeaderboardManager : MonoBehaviour
             };
         }
 
-        // Save Quest Ranking
         for (int i = 0; i < cachedQuestLeaderboard.Count; i++)
         {
             var entry = cachedQuestLeaderboard[i];
@@ -317,7 +300,6 @@ public class LeaderboardManager : MonoBehaviour
             };
         }
 
-        // Lưu vào Firebase
         string json = JsonConvert.SerializeObject(leaderboardSnapshot);
         bool isSaved = false;
 
@@ -329,12 +311,12 @@ public class LeaderboardManager : MonoBehaviour
             {
                 if (task.IsCompleted && !task.IsFaulted)
                 {
-                    Debug.Log($"✅ Leaderboard saved to Firebase for {today}");
+                    Debug.Log($" Leaderboard saved to Firebase for {today}");
                     isSaved = true;
                 }
                 else
                 {
-                    Debug.LogError($"❌ Failed to save leaderboard: {task.Exception}");
+                    Debug.LogError($" Failed to save leaderboard: {task.Exception}");
                     isSaved = true;
                 }
             });
@@ -342,12 +324,10 @@ public class LeaderboardManager : MonoBehaviour
         yield return new WaitUntil(() => isSaved);
     }
 
-    /// <summary>
-    /// ✅ THÊM: Refresh leaderboard từ Firebase (for real-time sync)
-    /// </summary>
+
     public IEnumerator RefreshLeaderboardFromFirebase()
     {
-        Debug.Log($"🔄 Refreshing leaderboard from Firebase...");
+        Debug.Log($" Refreshing leaderboard from Firebase...");
         yield return StartCoroutine(LoadAndCacheLeaderboardFromFirebase());
 
         // Update UI display
@@ -357,9 +337,7 @@ public class LeaderboardManager : MonoBehaviour
             DisplayQuestLeaderboard(cachedQuestLeaderboard);
     }
 
-    /// <summary>
-    /// Load dữ liệu mới nhất từ Users để bảng xếp hạng cập nhật sau khi lên cấp/hoàn thành nhiệm vụ.
-    /// </summary>
+
     public IEnumerator RefreshLeaderboardFromUsers()
     {
         if (isRefreshingLeaderboard)
@@ -392,11 +370,11 @@ public class LeaderboardManager : MonoBehaviour
                     cachedLevelLeaderboard = BuildRankedEntries(levelEntries);
                     cachedQuestLeaderboard = BuildRankedEntries(questEntries);
 
-                    Debug.Log($"✅ Live leaderboard refreshed from Users: Level={cachedLevelLeaderboard.Count}, Quest={cachedQuestLeaderboard.Count}");
+                    Debug.Log($" Live leaderboard refreshed from Users: Level={cachedLevelLeaderboard.Count}, Quest={cachedQuestLeaderboard.Count}");
                 }
                 else
                 {
-                    Debug.LogError($"❌ Failed to refresh leaderboard from Users: {task.Exception}");
+                    Debug.LogError($" Failed to refresh leaderboard from Users: {task.Exception}");
                 }
 
                 isLoaded = true;
@@ -455,7 +433,7 @@ public class LeaderboardManager : MonoBehaviour
         }
         catch (Exception e)
         {
-            Debug.LogWarning($"⚠️ Error parsing user level: {e.Message}");
+            Debug.LogWarning($" Error parsing user level: {e.Message}");
             return 1;
         }
     }
@@ -473,7 +451,7 @@ public class LeaderboardManager : MonoBehaviour
         }
         catch (Exception e)
         {
-            Debug.LogWarning($"⚠️ Error parsing user quests: {e.Message}");
+            Debug.LogWarning($" Error parsing user quests: {e.Message}");
             return 0;
         }
     }
@@ -524,7 +502,6 @@ public class LeaderboardManager : MonoBehaviour
         }
     }
 
-    // ✅ Public getters for cached leaderboards
     public List<LeaderboardEntry> GetLevelLeaderboard()
     {
         return new List<LeaderboardEntry>(cachedLevelLeaderboard);

@@ -99,9 +99,9 @@ public class SeedSlot : MonoBehaviour
 
         // TẠO INVENTORY ITEM
         InventoryItems returnSeed = new InventoryItems(
-            seedItemName,        // "pumpkin_seed"
-            seedDescription,     // "Hạt giống bí ngô"
-            quantity             // Số lượng cần trả về
+            seedItemName,      
+            seedDescription,    
+            quantity            
         );
 
         // THÊM VỀ INVENTORY
@@ -198,11 +198,10 @@ public class SeedSlot : MonoBehaviour
     {
         if (string.IsNullOrEmpty(plantType) || quantity <= 0)
         {
-            ClearSlot(false);
+            ClearSlot(saveToFirebase: false);
             return;
         }
 
-        // Lấy sprite và displayName từ database
         if (farmController?.recyclableInventory?.itemDatabase != null)
         {
             string seedItemName = $"{plantType}_seed";
@@ -243,59 +242,45 @@ public class SeedSlot : MonoBehaviour
         SetSelected(false);
         if (farmController != null && farmController.currentSelectedSlot == this)
         {
-            Debug.Log($"🔄 Clearing selected slot {slotId}");
+            Debug.Log($"Clearing selected slot {slotId}");
             farmController.currentSelectedSlot = null;
             farmController.selectedPlantData = null;
         }
-        // LƯU SAU KHI CLEAR
         if (saveToFirebase)
             SaveSlotDataToFirebase();
     }
 
-
-
-//public void SetSelected(bool isSelected)
-//    {
-//        if (selectionBorder != null)
-//            selectionBorder.SetActive(isSelected);
-//    }
     public void SetSelected(bool isSelected)
     {
-        Debug.Log($"🎯 SetSelected called on {gameObject.name}: {isSelected}");
+        Debug.Log($"   SetSelected called on {gameObject.name}: {isSelected}");
         Debug.Log($"   selectionBorder: {selectionBorder != null}");
 
         if (selectionBorder != null)
         {
             selectionBorder.SetActive(isSelected);
-            Debug.Log(message: $"✅ SelectionBorder set to: {isSelected}");
+            Debug.Log(message: $" SelectionBorder set to: {isSelected}");
         }
         else
         {
-            Debug.LogError($"❌ SelectionBorder is NULL on {gameObject.name}!");
+            Debug.LogError($" SelectionBorder is NULL on {gameObject.name}!");
         }
     }
-    //public void OnSlotClicked()
-    //{
-    //    if (!string.IsNullOrEmpty(plantType) && quantity > 0)
-    //    {
-    //        farmController?.SelectPlantFromSlot(this);
-    //    }
-    //}
+
     public void OnSlotClicked()
     {
-        Debug.Log($"🖱️ OnSlotClicked called on {gameObject.name}");
+        Debug.Log($"   OnSlotClicked called on {gameObject.name}");
         Debug.Log($"   plantType: '{plantType}'");
         Debug.Log($"   quantity: {quantity}");
         Debug.Log($"   farmController: {farmController != null}");
 
         if (!string.IsNullOrEmpty(plantType) && quantity > 0)
         {
-            Debug.Log($"✅ Calling SelectPlantFromSlot for {plantType}");
+            Debug.Log($"Calling SelectPlantFromSlot for {plantType}");
             farmController?.SelectPlantFromSlot(this);
         }
         else
         {
-            Debug.LogWarning($"⚠️ Cannot select slot - plantType: '{plantType}', quantity: {quantity}");
+            Debug.LogWarning($"Cannot select slot - plantType: '{plantType}', quantity: {quantity}");
         }
     }
     public bool CanPlant()
@@ -320,7 +305,6 @@ public class SeedSlot : MonoBehaviour
                 ClearSlot();
             }
 
-            // LƯU SAU KHI DÙNG
             SaveSlotDataToFirebase();
         }
     }

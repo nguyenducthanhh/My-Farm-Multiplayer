@@ -16,7 +16,7 @@ public class LeaderboardButtonController : MonoBehaviour
         if (LeaderboardManager.Instance != null)
         {
             LeaderboardManager.Instance.OpenLeaderboard();
-            Debug.Log("✅ Opened leaderboard");
+            Debug.Log(" Opened leaderboard");
         }
     }
 }

@@ -77,18 +77,16 @@ public class UsernameWizard : MonoBehaviour
 
         string currentName = LoadDataManager.userInGame.Name;
 
-        // ✅ DEBUG: Log để check tên hiện tại
-        Debug.Log($"🔍 SetupUI - Current Name: '{currentName}' - Length: {currentName?.Length}");
+        Debug.Log($" SetupUI - Current Name: '{currentName}' - Length: {currentName?.Length}");
 
-        // ✅ SỬA: Kiểm tra Name có phải rỗng hoặc tên mặc định không
         // Nếu Name rỗng hoặc bắt đầu với "Player_" → hiển thị wizard
         bool needsUsername = string.IsNullOrEmpty(currentName) ||
                             currentName.StartsWith("Player_");
 
         if (needsUsername)
         {
-            // ✅ Hiển thị bảng nhập tên
-            Debug.Log("📝 Showing username wizard - name is empty or default");
+            //  Hiển thị bảng nhập tên
+            Debug.Log(" Showing username wizard - name is empty or default");
 
             usernameWizard.SetActive(true);
             storageBox.SetActive(false);
@@ -98,8 +96,8 @@ public class UsernameWizard : MonoBehaviour
         }
         else
         {
-            // ✅ Ẩn bảng nhập tên - user đã có tên thực
-            Debug.Log($"✅ Username already set: '{currentName}'");
+            //  Ẩn bảng nhập tên - user đã có tên thực
+            Debug.Log($" Username already set: '{currentName}'");
 
             usernameWizard.SetActive(false);
             storageBox.SetActive(true);
@@ -147,26 +145,27 @@ public class UsernameWizard : MonoBehaviour
     {
         if (LoadDataManager.userInGame == null)
         {
-            Debug.LogError("❌ Cannot set username - user data is null!");
+            Debug.LogError(" Cannot set username - user data is null!");
             return;
         }
 
         if (inputUsername == null || string.IsNullOrEmpty(inputUsername.text))
         {
-            Debug.LogWarning("⚠️ Username input is empty!");
+            Debug.LogWarning(" Username input is empty!");
+            NotificationManager.ShowReward("Tên người dùng đang trống!", 1f);
             return;
         }
 
         string newUsername = inputUsername.text.Trim();
         if (string.IsNullOrEmpty(newUsername))
         {
-            Debug.LogWarning("⚠️ Username input is empty!");
+            Debug.LogWarning(" Username input is empty!");
             return;
         }
 
-        Debug.Log($"💾 Saving username to Firebase: '{newUsername}'");
+        Debug.Log($" Saving username to Firebase: '{newUsername}'");
 
-        // ✅ DISABLE button khi saving
+        //  DISABLE button khi saving
         if (buttonOk != null)
             buttonOk.interactable = false;
         if (inputUsername != null)
@@ -207,7 +206,7 @@ public class UsernameWizard : MonoBehaviour
                 }
                 else if (task.IsFaulted)
                 {
-                    Debug.LogError($"❌ Failed to check username uniqueness: {task.Exception}");
+                    Debug.LogError($" Failed to check username uniqueness: {task.Exception}");
                     checkFailed = true;
                 }
 
@@ -227,7 +226,8 @@ public class UsernameWizard : MonoBehaviour
 
         if (isDuplicate)
         {
-            Debug.LogWarning($"⚠️ Username already exists: '{newUsername}'");
+            Debug.LogWarning($" Username already exists: '{newUsername}'");
+            NotificationManager.ShowReward("Tên người dùng đã tồn tại!", 1f);
             if (buttonOk != null)
                 buttonOk.interactable = true;
             if (inputUsername != null)
@@ -237,7 +237,6 @@ public class UsernameWizard : MonoBehaviour
 
         LoadDataManager.userInGame.Name = newUsername;
 
-        // ✅ CẬP NHẬT: Dùng UpdateChildrenAsync để chỉ update field Name
         var userRef = FirebaseDatabase.DefaultInstance
             .GetReference("Users")
             .Child(LoadDataManager.firebaseUser.UserId);
@@ -252,9 +251,8 @@ public class UsernameWizard : MonoBehaviour
             {
                 if (task.IsCompleted && !task.IsFaulted)
                 {
-                    Debug.Log($"✅ Username saved successfully: '{newUsername}'");
+                    Debug.Log($" Username saved successfully: '{newUsername}'");
 
-                    // ✅ THÊM: Update tên trong Leaderboard
                     StartCoroutine(UpdateLeaderboardUsernameCoroutine(newUsername));
 
                     // Update UI
@@ -268,9 +266,8 @@ public class UsernameWizard : MonoBehaviour
                     seedSlot.SetActive(true);
 
                     IsEnteringUsername = false;
-                    Debug.Log("✅ Username setup completed");
-
-                    // ✅ THÊM: Enable controls lại
+                    Debug.Log(" Username setup completed");
+                    NotificationManager.ShowReward("Tên người dùng đã được cập nhật!", 1f);
                     if (buttonOk != null)
                         buttonOk.interactable = true;
                     if (inputUsername != null)
@@ -278,9 +275,8 @@ public class UsernameWizard : MonoBehaviour
                 }
                 else
                 {
-                    Debug.LogError($"❌ Failed to save username: {task.Exception?.Message}");
+                    Debug.LogError($" Failed to save username: {task.Exception?.Message}");
 
-                    // ✅ THÊM: Enable controls lại nếu lỗi
                     if (buttonOk != null)
                         buttonOk.interactable = true;
                     if (inputUsername != null)
@@ -289,17 +285,14 @@ public class UsernameWizard : MonoBehaviour
             });
     }
 
-    /// <summary>
-    /// ✅ THÊM: Update tên trong Leaderboard và refresh ngay
-    /// </summary>
     private IEnumerator UpdateLeaderboardUsernameCoroutine(string newUsername)
     {
         string today = System.DateTime.UtcNow.ToString("yyyy-MM-dd");
         string userId = LoadDataManager.firebaseUser.UserId;
 
-        Debug.Log($"🔄 Updating leaderboard username to: '{newUsername}'");
+        Debug.Log($" Updating leaderboard username to: '{newUsername}'");
 
-        // ✅ Update Level Leaderboard
+        //  Update Level Leaderboard
         bool levelUpdated = false;
         FirebaseDatabase.DefaultInstance
             .GetReference("Leaderboard/CurrentDaily")
@@ -312,16 +305,15 @@ public class UsernameWizard : MonoBehaviour
             {
                 if (task.IsCompleted && !task.IsFaulted)
                 {
-                    Debug.Log($"✅ Level leaderboard username updated");
+                    Debug.Log($" Level leaderboard username updated");
                 }
                 else
                 {
-                    Debug.LogError($"❌ Failed to update level leaderboard: {task.Exception}");
+                    Debug.LogError($" Failed to update level leaderboard: {task.Exception}");
                 }
                 levelUpdated = true;
             });
 
-        // ✅ Update Quest Leaderboard
         bool questUpdated = false;
         FirebaseDatabase.DefaultInstance
             .GetReference("Leaderboard/CurrentDaily")
@@ -334,24 +326,22 @@ public class UsernameWizard : MonoBehaviour
             {
                 if (task.IsCompleted && !task.IsFaulted)
                 {
-                    Debug.Log($"✅ Quest leaderboard username updated");
+                    Debug.Log($" Quest leaderboard username updated");
                 }
                 else
                 {
-                    Debug.LogError($"❌ Failed to update quest leaderboard: {task.Exception}");
+                    Debug.LogError($" Failed to update quest leaderboard: {task.Exception}");
                 }
                 questUpdated = true;
             });
 
-        // ✅ Đợi cả 2 update xong
         yield return new WaitUntil(() => levelUpdated && questUpdated);
 
-        // ✅ THÊM: Reload Leaderboard ngay sau khi update tên
-        Debug.Log("📊 Reloading leaderboard after username update...");
+        Debug.Log(" Reloading leaderboard after username update...");
         if (LeaderboardManager.Instance != null)
         {
             yield return StartCoroutine(LeaderboardManager.Instance.RefreshLeaderboardFromFirebase());
-            Debug.Log("✅ Leaderboard refreshed with new username!");
+            Debug.Log(" Leaderboard refreshed with new username!");
         }
     }
 }

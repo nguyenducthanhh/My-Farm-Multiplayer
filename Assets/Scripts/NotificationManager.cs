@@ -9,7 +9,6 @@ public class NotificationManager : MonoBehaviour
 
     [SerializeField] private Text rewardText;
 
-    // ✅ Queue để lưu thông báo
     private Queue<(string message, float duration)> notificationQueue = new Queue<(string, float)>();
     private Coroutine currentNotificationCoroutine;
 
@@ -26,13 +25,11 @@ public class NotificationManager : MonoBehaviour
         }
     }
 
-    // ✅ Hàm gọi từ bất kỳ đâu - Default 3 giây
     public static void ShowReward(string message)
     {
-        ShowReward(message, 3f);
+        ShowReward(message, 5f);
     }
 
-    // ✅ Hàm gọi với custom duration
     public static void ShowReward(string message, float duration)
     {
         if (Instance != null)
@@ -41,26 +38,22 @@ public class NotificationManager : MonoBehaviour
         }
     }
 
-    // ✅ Thêm thông báo vào queue
     private void EnqueueNotification(string message, float duration)
     {
         notificationQueue.Enqueue((message, duration));
 
-        // Nếu chưa có thông báo đang hiển thị → start ngay
         if (currentNotificationCoroutine == null)
         {
             currentNotificationCoroutine = StartCoroutine(ProcessNotificationQueue());
         }
     }
 
-    // ✅ Xử lý queue
     private IEnumerator ProcessNotificationQueue()
     {
         while (notificationQueue.Count > 0)
         {
             var (message, duration) = notificationQueue.Dequeue();
 
-            // Hiển thị thông báo
             if (rewardText != null)
             {
                 rewardText.text = message;
@@ -68,10 +61,8 @@ public class NotificationManager : MonoBehaviour
                 Debug.Log($" Notification: {message}");
             }
 
-            // Hiển thị duration
             yield return new WaitForSeconds(duration);
 
-            // Ẩn thông báo
             if (rewardText != null)
             {
                 rewardText.gameObject.SetActive(false);

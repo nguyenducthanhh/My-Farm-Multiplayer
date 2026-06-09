@@ -8,24 +8,24 @@ public class LevelConfig : ScriptableObject
     public class LevelThreshold
     {
         public int level;
-        public int experienceRequired;  // XP cần để lên cấp này
+        public int experienceRequired;
     }
 
     [System.Serializable]
     public class LevelUnlock
     {
         public int requiredLevel;
-        public string unlockedItemName;        // "grape_seed"
-        public string unlockedItemDescription; // "Hạt giống nho"
-        public UnlockType unlockType;          // Item hoặc Building
+        public string unlockedItemName; 
+        public string unlockedItemDescription;
+        public UnlockType unlockType;
     }
 
     public enum UnlockType
     {
-        Seed,        // Hạt giống
-        AnimalPen,   // Chuồng vật nuôi
-        Tool,        // Công cụ
-        Feature      // Tính năng khác
+        Seed,     
+        AnimalPen,   
+        Tool,       
+        Feature     
     }
 
     [SerializeField] public List<LevelThreshold> levelThresholds = new List<LevelThreshold>();

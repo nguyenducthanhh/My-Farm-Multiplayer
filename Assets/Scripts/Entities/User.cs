@@ -25,20 +25,16 @@ public class User
     public class DailyRewardData
     {
 
-        // ✅ QUÀ HÀNG NGÀY (Base Reward)
         public string lastDailyClaimDate;           // Ngày claim quà hàng ngày cuối cùng
         public int lastDailyClaimGold;              // Gold nhận được từ quà hàng ngày
         public bool hasClaimedDailyToday;           // Đã claim quà hàng ngày hôm nay?
 
-        // ✅ QUÀ RANKING (Top 1,2,3 Bonus)
         public string lastRankingRewardDate;        // Ngày nhận quà ranking cuối cùng
         public int lastRankingRewardGold;           // Gold nhận được từ quà ranking
         public bool hasClaimedRankingToday;         // Đã claim quà ranking hôm nay?
 
-        // ✅ SNAPSHOT TRACKER
         public string lastSavedSnapshotDate;        // Ngày snapshot được lưu
 
-        // ✅ ACCOUNT CREATED DATE - THÊM TRƯỜNG NÀY
         public string accountCreatedDate;           // Ngày tạo account (để kiểm tra account mới)
 
         public DailyRewardData()
@@ -53,7 +49,7 @@ public class User
 
             lastSavedSnapshotDate = "";
 
-            // ✅ THÊM: Khởi tạo accountCreatedDate = hôm nay
+            //Khởi tạo accountCreatedDate = hôm nay
             accountCreatedDate = System.DateTime.UtcNow.ToString("yyyy-MM-dd");
         }
     }

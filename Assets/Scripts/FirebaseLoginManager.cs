@@ -17,6 +17,7 @@ public class FirebaseLoginManager : MonoBehaviour
     public InputField ipRegisterEmail;
     public InputField ipRegisterPassword;
     public Button buttonRegister;
+    public Text registerErrorText;
 
     [Header("Sign In")]
     public InputField ipLoginEmail;
@@ -60,12 +61,15 @@ public class FirebaseLoginManager : MonoBehaviour
 
     public void RegisterAccountWithFirebase()
     {
+        ShowRegisterError("");
+
         string email = ipRegisterEmail.text;
         string password = ipRegisterPassword.text;
 
         if (string.IsNullOrEmpty(email) || string.IsNullOrEmpty(password))
         {
             Debug.LogWarning("Email or password is empty!");
+            ShowRegisterError("Email hoặc mật khẩu không được để trống.");
             return;
         }
 
@@ -74,11 +78,13 @@ public class FirebaseLoginManager : MonoBehaviour
             if (task.IsCanceled)
             {
                 Debug.Log("Đăng ký bị hủy");
+                ShowRegisterError("Đăng ký bị hủy.");
                 return;
             }
             if (task.IsFaulted)
             {
                 Debug.Log("Đăng ký thất bại: " + task.Exception?.Message);
+                ShowRegisterError("Đăng ký thất bại: " + GetTaskErrorMessage(task.Exception));
                 return;
             }
             if (task.IsCompleted)
@@ -90,12 +96,24 @@ public class FirebaseLoginManager : MonoBehaviour
                 {
                     if (initTask.IsCompleted && !initTask.IsFaulted && !initTask.IsCanceled)
                     {
-                        LoadingManager.NEXT_SCENE = ("PlayScene");
-                        SceneManager.LoadScene("LoadingScene");
+                        AccountSessionWatcher.StartNewSessionAsync(firebaseUser.UserId).ContinueWithOnMainThread(sessionTask =>
+                        {
+                            if (sessionTask.IsCompleted && !sessionTask.IsFaulted && !sessionTask.IsCanceled)
+                            {
+                                LoadingManager.NEXT_SCENE = ("PlayScene");
+                                SceneManager.LoadScene("LoadingScene");
+                            }
+                            else
+                            {
+                                Debug.LogError("Không thể tạo phiên đăng nhập: " + sessionTask.Exception);
+                                ShowRegisterError("Không thể tạo phiên đăng nhập: " + GetTaskErrorMessage(sessionTask.Exception));
+                            }
+                        });
                     }
                     else
                     {
                         Debug.LogError("Không thể tạo dữ liệu mặc định cho tài khoản: " + initTask.Exception);
+                        ShowRegisterError("Không thể lưu dữ liệu tài khoản: " + GetTaskErrorMessage(initTask.Exception));
                     }
                 });
             }
@@ -107,22 +125,22 @@ public class FirebaseLoginManager : MonoBehaviour
         var userRef = FirebaseDatabase.DefaultInstance.GetReference("Users").Child(userId);
         List<Task> createTasks = new List<Task>();
 
-        createTasks.Add(userRef.Child("Name").SetValueAsync(value: ""));
-        createTasks.Add(userRef.Child("Gold").SetValueAsync(gold));
+        createTasks.Add(SaveFieldOrThrow(userRef.Child("Name").SetValueAsync(value: ""), "Name"));
+        createTasks.Add(SaveFieldOrThrow(userRef.Child("Gold").SetValueAsync(gold), "Gold"));
 
-        createTasks.Add(CreateAndSaveDefaultMap(userRef));
+        createTasks.Add(SaveFieldOrThrow(CreateAndSaveDefaultMap(userRef), "MapInGame"));
 
         List<InventoryItems> emptyInventory = new List<InventoryItems>();
         string inventoryJson = JsonConvert.SerializeObject(emptyInventory);
-        createTasks.Add(userRef.Child("Inventory").SetRawJsonValueAsync(inventoryJson));
+        createTasks.Add(SaveFieldOrThrow(userRef.Child("Inventory").SetRawJsonValueAsync(inventoryJson), "Inventory"));
 
         List<PlantTileData> emptyPlants = new List<PlantTileData>();
         string plantsJson = JsonConvert.SerializeObject(emptyPlants);
-        createTasks.Add(userRef.Child("Plants").SetRawJsonValueAsync(plantsJson));
+        createTasks.Add(SaveFieldOrThrow(userRef.Child("Plants").SetRawJsonValueAsync(plantsJson), "Plants"));
 
-        createTasks.Add(CreateAndSaveDefaultLevel(userRef));
+        createTasks.Add(SaveFieldOrThrow(CreateAndSaveDefaultLevel(userRef), "Level"));
 
-        createTasks.Add(CreateAndSaveDefaultPosition(userRef));
+        createTasks.Add(SaveFieldOrThrow(CreateAndSaveDefaultPosition(userRef), "LastPosition"));
 
         var dailyReward = new User.DailyRewardData
         {
@@ -140,16 +158,17 @@ public class FirebaseLoginManager : MonoBehaviour
         };
 
         string rewardJson = JsonConvert.SerializeObject(dailyReward);
-        createTasks.Add(userRef.Child("DailyReward").SetRawJsonValueAsync(rewardJson));
+        createTasks.Add(SaveFieldOrThrow(userRef.Child("DailyReward").SetRawJsonValueAsync(rewardJson), "DailyReward"));
 
-        UpdateLeaderboardForNewAccount(userId, "");
+        createTasks.Add(SaveFieldOrThrow(UpdateLeaderboardForNewAccount(userId, ""), "Leaderboard"));
 
         return Task.WhenAll(createTasks);
     }
 
-    private void UpdateLeaderboardForNewAccount(string userId, string playerName)
+    private Task UpdateLeaderboardForNewAccount(string userId, string playerName)
     {
         string today = System.DateTime.UtcNow.ToString("yyyy-MM-dd");
+        List<Task> leaderboardTasks = new List<Task>();
 
         var levelRankEntry = new LeaderboardManager.LeaderboardRankEntry
         {
@@ -159,23 +178,13 @@ public class FirebaseLoginManager : MonoBehaviour
             timestamp = System.DateTime.UtcNow.ToString("O")
         };
 
-        FirebaseDatabase.DefaultInstance
+        Task levelTask = FirebaseDatabase.DefaultInstance
             .GetReference("Leaderboard/CurrentDaily")
             .Child(today)
             .Child("levelRanking")
             .Child(userId)
-            .SetRawJsonValueAsync(JsonConvert.SerializeObject(levelRankEntry))
-            .ContinueWithOnMainThread(task =>
-            {
-                if (task.IsCompleted && !task.IsFaulted)
-                {
-                    Debug.Log($"Account added to level leaderboard");
-                }
-                else
-                {
-                    Debug.LogError($"Failed to update level leaderboard: {task.Exception}");
-                }
-            });
+            .SetRawJsonValueAsync(JsonConvert.SerializeObject(levelRankEntry));
+        leaderboardTasks.Add(SaveFieldOrThrow(levelTask, "Leaderboard/levelRanking"));
 
         var questRankEntry = new LeaderboardManager.LeaderboardRankEntry
         {
@@ -185,23 +194,60 @@ public class FirebaseLoginManager : MonoBehaviour
             timestamp = System.DateTime.UtcNow.ToString("O")
         };
 
-        FirebaseDatabase.DefaultInstance
+        Task questTask = FirebaseDatabase.DefaultInstance
             .GetReference("Leaderboard/CurrentDaily")
             .Child(today)
             .Child("questRanking")
             .Child(userId)
-            .SetRawJsonValueAsync(JsonConvert.SerializeObject(questRankEntry))
-            .ContinueWithOnMainThread(task =>
-            {
-                if (task.IsCompleted && !task.IsFaulted)
-                {
-                    Debug.Log($"Account added to quest leaderboard");
-                }
-                else
-                {
-                    Debug.LogError($"Failed to update quest leaderboard: {task.Exception}");
-                }
-            });
+            .SetRawJsonValueAsync(JsonConvert.SerializeObject(questRankEntry));
+        leaderboardTasks.Add(SaveFieldOrThrow(questTask, "Leaderboard/questRanking"));
+
+        return Task.WhenAll(leaderboardTasks);
+    }
+
+    private async Task SaveFieldOrThrow(Task saveTask, string fieldName)
+    {
+        try
+        {
+            await saveTask;
+            Debug.Log($"Lưu thành công: {fieldName}");
+        }
+        catch (Exception e)
+        {
+            Debug.LogError($"Lưu thất bại: {fieldName}: {e.Message}");
+            throw new Exception($"Lỗi lưu {fieldName}: {e.Message}", e);
+        }
+    }
+
+    private void ShowRegisterError(string message)
+    {
+        if (registerErrorText != null)
+        {
+            registerErrorText.text = message;
+            registerErrorText.gameObject.SetActive(!string.IsNullOrEmpty(message));
+        }
+
+        if (!string.IsNullOrEmpty(message) && NotificationManager.Instance != null)
+        {
+            NotificationManager.ShowReward(message, 2f);
+        }
+    }
+
+    private string GetTaskErrorMessage(Exception exception)
+    {
+        if (exception == null)
+            return "Không rõ nguyên nhân.";
+
+        if (exception is AggregateException aggregateException)
+        {
+            Exception inner = aggregateException.Flatten().InnerExceptions.Count > 0
+                ? aggregateException.Flatten().InnerExceptions[0]
+                : aggregateException;
+
+            return inner.Message;
+        }
+
+        return exception.Message;
     }
 
     private Task CreateAndSaveDefaultPosition(DatabaseReference userRef)
@@ -289,8 +335,18 @@ public class FirebaseLoginManager : MonoBehaviour
                 {
                     if (initTask.IsCompleted && !initTask.IsFaulted && !initTask.IsCanceled)
                     {
-                        LoadingManager.NEXT_SCENE = ("PlayScene");
-                        SceneManager.LoadScene("LoadingScene");
+                        AccountSessionWatcher.StartNewSessionAsync(user.UserId).ContinueWithOnMainThread(sessionTask =>
+                        {
+                            if (sessionTask.IsCompleted && !sessionTask.IsFaulted && !sessionTask.IsCanceled)
+                            {
+                                LoadingManager.NEXT_SCENE = ("PlayScene");
+                                SceneManager.LoadScene("LoadingScene");
+                            }
+                            else
+                            {
+                                Debug.LogError("Không thể tạo phiên đăng nhập: " + sessionTask.Exception);
+                            }
+                        });
                     }
                     else
                     {

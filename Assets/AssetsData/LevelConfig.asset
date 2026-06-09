@@ -46,14 +46,14 @@ MonoBehaviour:
     unlockedItemName: Grape
     unlockedItemDescription: "H\u1EA1t gi\u1ED1ng nho"
     unlockType: 0
-  - requiredLevel: 5
-    unlockedItemName: Corn
-    unlockedItemDescription: "H\u1EA1t gi\u1ED1ng ng\xF4"
-    unlockType: 0
   - requiredLevel: 3
     unlockedItemName: chicken_pen_1
     unlockedItemDescription: "Chu\u1ED3ng g\xE0"
     unlockType: 1
+  - requiredLevel: 5
+    unlockedItemName: Corn
+    unlockedItemDescription: "H\u1EA1t gi\u1ED1ng ng\xF4"
+    unlockType: 0
   - requiredLevel: 6
     unlockedItemName: pig_pen_1
     unlockedItemDescription: "Chu\u1ED3ng l\u1EE3n"

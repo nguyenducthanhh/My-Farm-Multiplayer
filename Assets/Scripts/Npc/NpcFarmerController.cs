@@ -80,7 +80,6 @@ public class NpcFarmerController : MonoBehaviour
 
     private void SetupStaticShopItems()
     {
-        // Setup từng item có sẵn
         if (paddyShopItem != null )
             paddyShopItem.Setup(seedsForSale[0], this);
 
@@ -99,7 +98,6 @@ public class NpcFarmerController : MonoBehaviour
     private void ShowLockedMessage(string message)
     {
         Debug.Log($" {message}");
-        // ✅ TODO: Hiển thị thông báo UI
     }
 
     public void PurchaseSeed(SeedShopItem seedItem)
@@ -108,35 +106,33 @@ public class NpcFarmerController : MonoBehaviour
         Debug.Log($" Seed Name: {seedItem.seedData.itemName}");
         Debug.Log($" Is Unlocked: {LevelSystem.Instance.IsItemUnlocked(seedItem.seedData.itemName)}");
 
-        // ✅ THÊM: Kiểm tra đã mở khóa chưa
-        string seedUnlockName = seedItem.seedData.itemName;  // "paddy", "grape", "corn", etc.
+        string seedUnlockName = seedItem.seedData.itemName;
 
         if (!LevelSystem.Instance.IsItemUnlocked(seedUnlockName))
         {
             int requiredLevel = LevelSystem.Instance.GetRequiredLevelForItem(seedUnlockName);
-            Debug.Log($" Cần đạt cấp {requiredLevel} để mở khóa {seedItem.seedData.description}!");
+            Debug.Log(message: $" Cần đạt cấp {requiredLevel} để mở khóa {seedItem.seedData.description}!");
 
-            // ✅ Hiển thị thông báo UI (optional)
             ShowLockedMessage($"Mở khóa tại cấp {requiredLevel}");
             return;
         }
         if (!CanAfford(seedItem.price))
         {
             Debug.Log($"Không đủ tiền! Cần {seedItem.price} gold, hiện có {LoadDataManager.userInGame.Gold}");
+            NotificationManager.ShowReward($"Không đủ vàng! Cần {seedItem.price} vàng, hiện có {LoadDataManager.userInGame.Gold}", 1f);
             return;
         }
 
         LoadDataManager.userInGame.Gold -= seedItem.price;
 
-        // TẠO SEED ITEM VỚI TÊN _seed
         string seedItemName = $"{seedItem.seedData.itemName}_seed";
         string seedDescription = playerInventory.itemDatabase?.GetDescription(seedItemName)
                                ?? $"Hạt {seedItem.seedData.description}";
 
         InventoryItems newSeed = new InventoryItems(
-            seedItemName,                    // "pumpkin_seed"
-            seedDescription,                 // "Hạt giống bí ngô"
-            seedItem.quantityPerPurchase     // Số lượng
+            seedItemName,               
+            seedDescription,                
+            seedItem.quantityPerPurchase   
         );
 
         playerInventory.AddInventoryItem(newSeed);
@@ -144,6 +140,7 @@ public class NpcFarmerController : MonoBehaviour
         UpdateGoldDisplay();
         UsernameWizard.UpdateGoldDisplay();
         Debug.Log($"Đã mua {seedItem.quantityPerPurchase}x {seedItemName}");
+        NotificationManager.ShowReward($"Đã mua x{seedItem.quantityPerPurchase} {seedItem.seedData.description}", 1f);
     }
 
 

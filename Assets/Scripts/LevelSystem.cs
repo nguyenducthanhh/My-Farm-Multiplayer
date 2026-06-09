@@ -46,10 +46,10 @@ public class LevelSystem : MonoBehaviour
             Destroy(gameObject);
 
         if (levelConfig == null)
-            Debug.LogError("❌ LevelConfig not assigned!");
+            Debug.LogError(" LevelConfig not assigned!");
 
         RecalculateExperienceToNextLevel();
-        Debug.Log($"✅ Initialized experienceToNextLevel: {experienceToNextLevel}");
+        Debug.Log($" Initialized experienceToNextLevel: {experienceToNextLevel}");
 
         StartCoroutine(WaitForUserDataAndLoadLevel());
 
@@ -72,7 +72,7 @@ public class LevelSystem : MonoBehaviour
         RecalculateExperienceToNextLevel();
 
         currentExperience += amount;
-        Debug.Log($"📊 +{amount} XP (Total: {currentExperience}/{experienceToNextLevel})");
+        Debug.Log($" +{amount} XP (Total: {currentExperience}/{experienceToNextLevel})");
 
         while (currentExperience >= experienceToNextLevel)
         {
@@ -87,48 +87,28 @@ public class LevelSystem : MonoBehaviour
         currentExperience -= experienceToNextLevel;
         currentLevel++;
 
-        // ✅ Lấy XP requirement từ config
         RecalculateExperienceToNextLevel();
 
-        Debug.Log($"🎉 LÊN CẤP {currentLevel}! EXP: {currentExperience}/{experienceToNextLevel}");
-
+        Debug.Log($" LÊN CẤP {currentLevel}! EXP: {currentExperience}/{experienceToNextLevel}");
+        NotificationManager.ShowReward($"LÊN CẤP {currentLevel}!");
         CheckUnlockedItems();
     }
 
-    //private void CheckUnlockedItems()
-    //{
-    //    if (levelConfig == null) return;
-
-    //    foreach (var unlock in levelConfig.levelUnlocks)
-    //    {
-    //        if (currentLevel >= unlock.requiredLevel && !unlockedItems.Contains(unlock.unlockedItemName))
-    //        {
-    //            unlockedItems.Add(unlock.unlockedItemName);
-    //            Debug.Log($"🔓 UNLOCK: {unlock.unlockedItemDescription} (Cấp {unlock.requiredLevel})");
-
-    //            // ✅ Broadcast unlock event
-    //            OnItemUnlocked?.Invoke(unlock);
-    //        }
-    //    }
-
-    //    SaveLevelDataToFirebase();
-    //}
     private void CheckUnlockedItems()
     {
         if (levelConfig == null) return;
 
-        Debug.Log($"🔍 Checking unlocks - Current Level: {currentLevel}, Unlocked Items: {string.Join(", ", unlockedItems)}");
+        Debug.Log($" Checking unlocks - Current Level: {currentLevel}, Unlocked Items: {string.Join(", ", unlockedItems)}");
 
         foreach (var unlock in levelConfig.levelUnlocks)
         {
-            Debug.Log($"   ├─ Checking {unlock.unlockedItemName}: Level {unlock.requiredLevel}, Current: {currentLevel}");
+            Debug.Log($" Checking {unlock.unlockedItemName}: Level {unlock.requiredLevel}, Current: {currentLevel}");
 
             if (currentLevel >= unlock.requiredLevel && !unlockedItems.Contains(unlock.unlockedItemName))
             {
                 unlockedItems.Add(unlock.unlockedItemName);
-                Debug.Log($"🔓 UNLOCK: {unlock.unlockedItemDescription} (Cấp {unlock.requiredLevel})");
+                Debug.Log($" UNLOCK: {unlock.unlockedItemDescription} (Cấp {unlock.requiredLevel})");
 
-                // ✅ Broadcast unlock event
                 OnItemUnlocked?.Invoke(unlock);
             }
         }
@@ -136,17 +116,17 @@ public class LevelSystem : MonoBehaviour
         SaveLevelDataToFirebase();
     }
 
-    // ✅ Event khi item được mở khóa
+    //  Event khi item được mở khóa
     public delegate void OnUnlockHandler(LevelConfig.LevelUnlock unlockedItem);
     public static event OnUnlockHandler OnItemUnlocked;
 
-    // ✅ Kiểm tra item có được mở khóa
+    //  Kiểm tra item có được mở khóa
     public bool IsItemUnlocked(string itemName)
     {
         return unlockedItems.Contains(itemName);
     }
 
-    // ✅ Lấy level yêu cầu để mở khóa item
+    //  Lấy level yêu cầu để mở khóa item
     public int GetRequiredLevelForItem(string itemName)
     {
         if (levelConfig == null) return -1;
@@ -187,11 +167,9 @@ public class LevelSystem : MonoBehaviour
 
         if (guard >= 100)
         {
-            Debug.LogWarning("⚠️ Level normalization stopped after 100 level-ups. Check LevelConfig thresholds.");
+            Debug.LogWarning(" Level normalization stopped after 100 level-ups. Check LevelConfig thresholds.");
         }
     }
-
-    // ✅ THÊM: Getter cho LevelData (để save)
 
 
     public int GetCurrentLevel() => currentLevel;
@@ -224,7 +202,7 @@ public class LevelSystem : MonoBehaviour
                             unlockedItems = levelData.unlockedItems ?? new List<string>();
                             NormalizeLevelProgressFromConfig();
 
-                            Debug.Log($"✅ Loaded Level: {currentLevel}, EXP: {currentExperience}/{experienceToNextLevel}");
+                            Debug.Log($" Loaded Level: {currentLevel}, EXP: {currentExperience}/{experienceToNextLevel}");
                         }
                     }
                     catch (Exception e)

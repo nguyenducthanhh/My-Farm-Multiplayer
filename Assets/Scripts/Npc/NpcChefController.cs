@@ -17,8 +17,8 @@ public class NpcChefController : MonoBehaviour
     [Header("UI References")]
     [SerializeField] private Button interactButton;
     [SerializeField] private GameObject chefMenuPanel;
-    [SerializeField] private Button closeMenuButton;      // ← THÊM: Nút đóng menu
-    [SerializeField] private Text goldDisplayText;        // ← THÊM: Text hiển thị gold
+    [SerializeField] private Button closeMenuButton;      
+    [SerializeField] private Text goldDisplayText;        
 
     [Header("Player References")]
     [SerializeField] private RecyclableInventory playerInventory;
@@ -29,13 +29,13 @@ public class NpcChefController : MonoBehaviour
     [System.Serializable]
     public class RecipeButton
     {
-        public string dishName;                           // "Thịt lợn nướng"
-        public string dishItemName;                       // "grilled_pork" (KHÔNG cần _item)
+        public string dishName;                        
+        public string dishItemName;                       
         public List<IngredientRequirement> ingredients = new List<IngredientRequirement>();
         public float cookingDuration;
-        public Button cookButton;                         // Button "Nấu"
-        public Button collectButton;                      // Button "Thu thập"
-        public Text statusText;                           // Text hiển thị trạng thái
+        public Button cookButton;                        
+        public Button collectButton;                   
+        public Text statusText;                         
     }
 
     [System.Serializable]
@@ -75,22 +75,19 @@ public class NpcChefController : MonoBehaviour
         if (interactButton != null)
             interactButton.onClick.AddListener(OpenChefMenu);
 
-        // ✅ THÊM: Nút đóng menu
         if (closeMenuButton != null)
             closeMenuButton.onClick.AddListener(CloseChefMenu);
 
         chefMenuPanel?.SetActive(false);
 
-        // ✅ Khởi tạo cooking slots và button listeners
         for (int i = 0; i < recipeButtons.Count; i++)
         {
             var recipe = recipeButtons[i];
             cookingSlots[recipe] = new CookingSlot { recipe = recipe };
 
-            // ✅ Gắn listeners cho buttons
             if (recipe.cookButton != null)
             {
-                int index = i; // Capture for closure
+                int index = i;
                 recipe.cookButton.onClick.AddListener(() => OnCookButtonClicked(index));
             }
 
@@ -129,7 +126,6 @@ public class NpcChefController : MonoBehaviour
     {
         if (!playerInRange) return;
 
-        // ✅ Kiểm tra tất cả recipes đang nấu
         foreach (var recipe in recipeButtons)
         {
             if (cookingSlots[recipe].isCooking && DateTime.UtcNow >= new DateTime(cookingSlots[recipe].nextCookingTimeTicks, DateTimeKind.Utc))
@@ -141,7 +137,6 @@ public class NpcChefController : MonoBehaviour
             }
         }
 
-        // ✅ Cập nhật UI mỗi frame
         if (chefMenuPanel != null && chefMenuPanel.activeInHierarchy)
         {
             RefreshUI();
@@ -154,7 +149,7 @@ public class NpcChefController : MonoBehaviour
         {
             chefMenuPanel.SetActive(true);
             RefreshUI();
-            UpdateGoldDisplay();  // ← THÊM: Cập nhật gold khi mở menu
+            UpdateGoldDisplay(); 
         }
     }
 
@@ -164,7 +159,6 @@ public class NpcChefController : MonoBehaviour
             chefMenuPanel.SetActive(false);
     }
 
-    // ✅ THÊM: Method cập nhật gold display
     private void UpdateGoldDisplay()
     {
         if (goldDisplayText != null && LoadDataManager.userInGame != null)
@@ -175,7 +169,6 @@ public class NpcChefController : MonoBehaviour
 
     private void RefreshUI()
     {
-        // ✅ THÊM: Cập nhật gold display
         UpdateGoldDisplay();
 
         foreach (var recipe in recipeButtons)
@@ -184,24 +177,20 @@ public class NpcChefController : MonoBehaviour
 
             if (slot.canCollect)
             {
-                // ✅ Sẵn sàng thu thập
                 recipe.cookButton?.gameObject.SetActive(false);
                 recipe.collectButton?.gameObject.SetActive(true);
 
-                // ✅ THAY ĐỔI: Ẩn statusText khi xong
                 if (recipe.statusText != null)
                     recipe.statusText.gameObject.SetActive(false);
             }
             else if (slot.isCooking)
             {
-                // ✅ Đang nấu
                 float timeRemaining = (float)(new DateTime(slot.nextCookingTimeTicks, DateTimeKind.Utc) - DateTime.UtcNow).TotalSeconds;
                 timeRemaining = Mathf.Max(0, timeRemaining);
 
                 recipe.cookButton?.gameObject.SetActive(false);
                 recipe.collectButton?.gameObject.SetActive(false);
 
-                // ✅ THAY ĐỔI: Hiển thị statusText khi đang nấu
                 if (recipe.statusText != null)
                 {
                     recipe.statusText.gameObject.SetActive(true);
@@ -210,11 +199,9 @@ public class NpcChefController : MonoBehaviour
             }
             else
             {
-                // ✅ Sẵn sàng để nấu (chưa nấu)
                 recipe.cookButton?.gameObject.SetActive(true);
                 recipe.collectButton?.gameObject.SetActive(false);
 
-                // ✅ THAY ĐỔI: Ẩn statusText khi chưa nấu
                 if (recipe.statusText != null)
                     recipe.statusText.gameObject.SetActive(false);
             }
@@ -227,8 +214,7 @@ public class NpcChefController : MonoBehaviour
 
         var recipe = recipeButtons[recipeIndex];
 
-        // ✅ DEBUG: In ra tất cả ingredients và số lượng
-        Debug.Log($"🔍 === Checking ingredients for {recipe.dishName} ===");
+        Debug.Log($" Checking ingredients for {recipe.dishName} ===");
 
         foreach (var ingredient in recipe.ingredients)
         {
@@ -237,44 +223,41 @@ public class NpcChefController : MonoBehaviour
             Debug.Log($"   Need: {ingredient.quantity}, Have: {quantity}");
         }
 
-        Debug.Log($"📊 Can Cook? {CanCook(recipe)}");
+        Debug.Log($" Can Cook? {CanCook(recipe)}");
 
         if (!CanCook(recipe))
         {
-            Debug.Log($"❌ Không đủ nguyên liệu cho {recipe.dishName}!");
+            Debug.Log($" Không đủ nguyên liệu cho {recipe.dishName}!");
+            NotificationManager.ShowReward($"Không đủ nguyên liệu cho {recipe.dishName}!", 1f);
             return;
         }
 
-        // ✅ DEBUG: Trước khi trừ
-        Debug.Log($"📍 Before removing items:");
+        Debug.Log($" Before removing items:");
         foreach (var item in playerInventory._invenItems)
         {
             if (item.name.Contains("grape"))
                 Debug.Log($"   {item.name}: {item.quantity}");
         }
 
-        // ✅ Trừ tất cả nguyên liệu
         foreach (var ingredient in recipe.ingredients)
         {
             playerInventory.RemoveInventoryItem(ingredient.itemName, ingredient.quantity);
             Debug.Log($"   Removed {ingredient.quantity}x {ingredient.itemName}");
         }
 
-        // ✅ DEBUG: Sau khi trừ
-        Debug.Log($"📍 After removing items:");
+        Debug.Log($" After removing items:");
         foreach (var item in playerInventory._invenItems)
         {
             if (item.name.Contains("grape"))
                 Debug.Log($"   {item.name}: {item.quantity}");
         }
 
-        // ✅ Bắt đầu nấu
         var slot = cookingSlots[recipe];
         slot.isCooking = true;
         slot.canCollect = false;
         slot.nextCookingTimeTicks = DateTime.UtcNow.AddSeconds(recipe.cookingDuration).Ticks;
 
-        Debug.Log($"✅ Bắt đầu nấu {recipe.dishName}");
+        Debug.Log($" Bắt đầu nấu {recipe.dishName}");
 
         SaveChefDataToFirebase();
     }
@@ -287,25 +270,22 @@ public class NpcChefController : MonoBehaviour
 
         if (!slot.canCollect)
         {
-            Debug.Log("❌ Chưa nấu xong!");
+            Debug.Log(" Chưa nấu xong!");
             return;
         }
 
-        // ✅ Tạo món ăn và thêm vào inventory
-        // ✅ QUAN TRỌNG: Sử dụng dishItemName TRỰC TIẾP (KHÔNG thêm _item)
         InventoryItems dish = new InventoryItems(
-            recipe.dishItemName,    // "grilled_pork" (không phải "grilled_pork_item")
+            recipe.dishItemName,   
             recipe.dishName,
             1
         );
 
         playerInventory.AddInventoryItem(dish);
 
-        // ✅ Reset slot
         slot.isCooking = false;
         slot.canCollect = false;
 
-        Debug.Log($"✅ Thu thập được 1 {recipe.dishName}");
+        Debug.Log($"Thu thập được 1 {recipe.dishName}");
 
         SaveChefDataToFirebase();
     }
@@ -358,7 +338,7 @@ public class NpcChefController : MonoBehaviour
                                 }
                             }
 
-                            Debug.Log($"✅ Loaded chef data");
+                            Debug.Log($" Loaded chef data");
                         }
                     }
                     catch (System.Exception e)

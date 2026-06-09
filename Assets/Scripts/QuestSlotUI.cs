@@ -25,11 +25,9 @@ public class QuestSlotUI : MonoBehaviour
         rewardText.text = $" +{quest.rewardExperience} XP | +{quest.rewardGold} Vàng";
         
 
-        // ✅ Debug: Kiểm tra requirements
-        Debug.Log($"🎯 Setting quest: {quest.questName}");
+        Debug.Log($"   Setting quest: {quest.questName}");
         Debug.Log($"   Requirements count: {(quest.requirements?.Count ?? 0)}");
 
-        // ✅ Hiển thị yêu cầu
         string reqText = "Yêu cầu:\n";
 
         if (quest.requirements != null && quest.requirements.Count > 0)
@@ -39,27 +37,25 @@ public class QuestSlotUI : MonoBehaviour
                 int have = inventory.GetItemQuantity(req.itemName);
                 reqText += $"• {req.itemDescription} x{req.quantity} ({have}/{req.quantity})\n";
 
-                // Debug từng requirement
-                Debug.Log($"   ├─ Item: {req.itemName}, Need: {req.quantity}, Have: {have}");
+                Debug.Log($" Item: {req.itemName}, Need: {req.quantity}, Have: {have}");
             }
         }
         else
         {
             reqText += "Không có yêu cầu";
-            Debug.LogWarning("⚠️ Quest không có requirements!");
+            Debug.LogWarning(" Quest không có requirements!");
         }
 
         if (requirementsText != null)
         {
             requirementsText.text = reqText;
-            Debug.Log($"✅ requirementsText updated");
+            Debug.Log($" requirementsText updated");
         }
         else
         {
-            Debug.LogError("❌ requirementsText is NULL!");
+            Debug.LogError(" requirementsText is NULL!");
         }
 
-        // ✅ Update button
         if (completeButton != null)
         {
             completeButton.onClick.RemoveAllListeners();
@@ -79,7 +75,7 @@ public class QuestSlotUI : MonoBehaviour
 
         if (!QuestSystem.Instance.CanCompleteQuest(currentQuest, inventory))
         {
-            Debug.Log("❌ Không đủ items để hoàn thành quest!");
+            Debug.Log(" Không đủ items để hoàn thành quest!");
             return;
         }
 

@@ -4,7 +4,7 @@ using UnityEngine;
 [CreateAssetMenu(fileName = "Item Database", menuName = "Inventory/Item Database")]
 public class ItemDatabase : ScriptableObject
 {
-    [Header("All Items")]
+    [Header(header: "All Items")]
     public List<ItemData> allItems = new List<ItemData>();
 
     private Dictionary<string, ItemData> itemDict = new Dictionary<string, ItemData>();
@@ -40,7 +40,6 @@ public class ItemDatabase : ScriptableObject
         var item = GetItem(GetBaseItemName(itemName));
         if (item == null) return null;
 
-        // Xác định loại item và trả về sprite phù hợp
         if (itemName.Contains("_seed"))
         {
             return item.seedSprite != null ? item.seedSprite : item.harvestedSprite;
@@ -51,7 +50,6 @@ public class ItemDatabase : ScriptableObject
         }
         else
         {
-            // Mặc định trả về harvested sprite
             return item.harvestedSprite != null ? item.harvestedSprite : item.seedSprite;
         }
     }
@@ -73,7 +71,6 @@ public class ItemDatabase : ScriptableObject
         var item = GetItem(GetBaseItemName(itemName));
         if (item == null) return "";
 
-        // Tạo description phù hợp với context
         if (itemName.Contains("_seed"))
         {
             return $"Hạt giống {item.description}";
@@ -89,80 +86,6 @@ public class ItemDatabase : ScriptableObject
         return item.description;
     }
 
-    //public bool IsValidItem(string itemName)
-    //{
-    //    return itemDict.ContainsKey(GetBaseItemName(itemName));
-    //}
-
-    //public bool IsSeedItem(string itemName)
-    //{
-    //    return itemName.Contains("_seed");
-    //}
-
-    //public bool IsFruitItem(string itemName)
-    //{
-    //    return itemName.Contains("_fruit") || itemName.Contains("_harvested");
-    //}
-
-    //public int GetSellPrice(string itemName)
-    //{
-    //    var item = GetItem(GetBaseItemName(itemName));
-    //    if (item == null) return 0;
-
-    //    if (IsFruitItem(itemName))
-    //    {
-    //        return item.sellPrice * 2;
-    //    }
-    //    else if (IsSeedItem(itemName))
-    //    {
-    //        return item.sellPrice;
-    //    }
-
-    //    return item.sellPrice;
-    //}
-
-    // Thêm methods cho compatibility với InventoryCell
-    //public ItemType GetItemType(string itemName)
-    //{
-    //    if (IsSeedItem(itemName))        // Contains "_seed"
-    //        return ItemType.Seed;
-    //    else if (IsFruitItem(itemName))  // Contains "_fruit" 
-    //        return ItemType.Fruit;
-    //    else
-    //        return ItemType.Default;
-    //}
-
-    //public string GetDisplayName(string itemName)
-    //{
-    //    return GetDescription(itemName);
-    //}
-    //public bool CanFeedAnimals(string itemName)
-    //{
-    //    var item = GetItem(GetBaseItemName(itemName));
-
-    //    // Chỉ fruits mới có thể cho động vật ăn
-    //    if (IsFruitItem(itemName) && item?.isFood == true)
-    //    {
-    //        return true;
-    //    }
-
-    //    return false;
-    //}
-
-    //[ContextMenu("Refresh Database")]
-    //public void RefreshDatabase()
-    //{
-    //    InitializeDictionary();
-    //}
 }
 
-// Thêm enum ItemType
-//public enum ItemType
-//{
-//    Default,
-//    Seed,
-//    Fruit,
-//    Tool,
-//    Material
-//}
 

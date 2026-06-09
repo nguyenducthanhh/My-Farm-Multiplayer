@@ -200,7 +200,6 @@ public class PlayerFarmController : MonoBehaviour
     // Them 3
     public void SelectPlant(string plantType)
     {
-        //selectedPlantData = allPlantDatas.Find(p => p.plantType == plantType);
         selectedPlantData = GetPlantData(plantType);
         if (selectedPlantData != null)
         {
@@ -309,13 +308,11 @@ public class PlayerFarmController : MonoBehaviour
         }
 
         LoadAvailableSeeds();
-        // Load seed slots from Firebase
         if (seedSlot1 != null)
             seedSlot1.LoadSlotDataFromFirebase();
 
         if (seedSlot2 != null)
             seedSlot2.LoadSlotDataFromFirebase();
-        //recyclableInventory = GameObject.Find("InventoryManager").GetComponent<RecyclableInventory>();
     }
 
     
@@ -356,6 +353,10 @@ public class PlayerFarmController : MonoBehaviour
 
                 StartCoroutine(HoeRoutine(facing));
             }
+            else {
+                Debug.Log("Đất đã được sử dụng");
+                NotificationManager.ShowReward("Đất đã được sử dụng", 1f);
+            }
         }        
     }
 
@@ -367,7 +368,7 @@ public class PlayerFarmController : MonoBehaviour
         if (AudioManager.Instance != null)
         {
             AudioManager.Instance.PlayHoeSound();
-            Debug.Log("🔊 Playing hoe sound");
+            Debug.Log(" Playing hoe sound");
         }
         yield return new WaitForSeconds(hoeDuration);
 
@@ -422,7 +423,7 @@ public class PlayerFarmController : MonoBehaviour
         if (AudioManager.Instance != null)
         {
             AudioManager.Instance.PlayWaterSound();
-            Debug.Log("🔊 Playing water sound");
+            Debug.Log(" Playing water sound");
         }
         yield return new WaitForSeconds(waterDuration);
 
@@ -482,7 +483,7 @@ public class PlayerFarmController : MonoBehaviour
                 if (AudioManager.Instance != null)
                 {
                     AudioManager.Instance.PlayPlantSound();
-                    Debug.Log("🔊 Playing Plant sound");
+                    Debug.Log(" Playing Plant sound");
                 }
                 tileMapManager.AddPlant(newPlant);
                 UpdatePlantVisual(cellPos, newPlant);
@@ -515,7 +516,6 @@ public class PlayerFarmController : MonoBehaviour
             }
 
 
-            //PlantData data = allPlantDatas.Find(p => p.plantType == plant.plantType);
             PlantData data = GetPlantData(plant.plantType);
             if (data == null)
             {
@@ -534,7 +534,7 @@ public class PlayerFarmController : MonoBehaviour
                 if (AudioManager.Instance != null)
                 {
                     AudioManager.Instance.PlayHarvestSound();
-                    Debug.Log("🔊 Playing harvest sound");
+                    Debug.Log(" Playing harvest sound");
                 }
                 tileMapManager.SetStateForTilemapDetail(cellPos.x, cellPos.y, TileMapState.Grass);
 
@@ -545,15 +545,8 @@ public class PlayerFarmController : MonoBehaviour
                     Debug.LogError("RecyclableInventory is null! Make sure it's assigned in Inspector.");
                     return;
                 }
-                //Them 27/3
                 CreateHarvestedFruit(plant.plantType);
-                ////InventoryItems item = new InventoryItems();
-                ////
-                //InventoryItems item = new InventoryItems(plant.plantType, $"Fresh {plant.plantType}", 1);
-                //Debug.Log($"Adding item to inventory: {item.name}");
-
-                ////item.name = plant.plantType;
-                //recyclableInventory.AddInventoryItem(item);
+            
 
 
             }
@@ -568,7 +561,7 @@ public class PlayerFarmController : MonoBehaviour
 
         foreach (var seed in allSeeds)
         {
-            // ✅ Kiểm tra hạt giống có được mở khóa không
+            //  Kiểm tra hạt giống có được mở khóa không
             if (LevelSystem.Instance.IsItemUnlocked(seed))
             {
                 availableSeeds.Add(seed);
@@ -584,7 +577,6 @@ public class PlayerFarmController : MonoBehaviour
         Debug.Log($"Total available seeds: {availableSeeds.Count}");
     }
 
-    // ✅ THÊM: Getter
     public bool IsSeedAvailable(string seedName)
     {
         return availableSeeds.Contains(seedName);
@@ -615,7 +607,6 @@ public class PlayerFarmController : MonoBehaviour
     public void UpdatePlantVisual(Vector3Int cellPos, PlantTileData tile)
     {
         PlantData data = GetPlantData(tile.plantType);
-        //PlantData data = allPlantDatas.Find(p => p.plantType == tile.plantType);
         
        
         if (data == null)
@@ -654,8 +645,6 @@ public class PlayerFarmController : MonoBehaviour
 
      
     }
-
-   
 
     public void LoadPlantsFromFirebase()
     {

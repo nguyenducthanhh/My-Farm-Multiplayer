@@ -14,7 +14,6 @@ public class PlantTileData
     public int currentStage;
 
     public bool isWatered;
-    // ===== Constructor =====
     public PlantTileData(string type, int posX, int posY)
     {
         plantType = type;

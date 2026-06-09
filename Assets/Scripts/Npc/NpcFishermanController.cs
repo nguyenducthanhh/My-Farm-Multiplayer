@@ -39,7 +39,7 @@ public class NpcFishermanController : MonoBehaviour
     [System.Serializable]
     public class FishSellData
     {
-        public string fishType; // "salmon_fish", "tuna_fish", etc.
+        public string fishType;
         public int sellPrice;
         public int experienceReward;
     }
@@ -88,7 +88,7 @@ public class NpcFishermanController : MonoBehaviour
         {
             fishShopMenu.SetActive(true);
             UpdateGoldDisplay();
-            RefreshFishSellButtons(); // Cập nhật buttons dựa trên inventory
+            RefreshFishSellButtons();
         }
     }
 
@@ -126,26 +126,25 @@ public class NpcFishermanController : MonoBehaviour
         }
     }
 
-    // ===== BAIT PURCHASE =====
     public void PurchaseBait(BaitShopItem baitItem)
     {
         if (!CanAfford(baitItem.price))
         {
             Debug.Log($"Không đủ tiền! Cần {baitItem.price} gold, hiện có {LoadDataManager.userInGame.Gold}");
+            NotificationManager.ShowReward("Không đủ vàng để mua mồi!", 1f);
             return;
         }
 
         LoadDataManager.userInGame.Gold -= baitItem.price;
 
-        // Tạo bait item
         string baitItemName =baitItem.baitData.itemName;
         string baitDescription = playerInventory.itemDatabase?.GetDescription(baitItemName)
                                ?? baitItem.baitData.description;
 
         InventoryItems newBait = new InventoryItems(
-            baitItemName,                    // "worm_bait"
-            baitDescription,                 // "Mồi giun"
-            baitItem.quantityPerPurchase     // Số lượng
+            baitItemName,                
+            baitDescription,               
+            baitItem.quantityPerPurchase    
         );
 
         playerInventory.AddInventoryItem(newBait);
@@ -154,12 +153,11 @@ public class NpcFishermanController : MonoBehaviour
         UsernameWizard.UpdateGoldDisplay();
 
         Debug.Log($"Đã mua {baitItem.quantityPerPurchase}x {baitItemName}");
+        NotificationManager.ShowReward($"Đã mua x{baitItem.quantityPerPurchase} {baitDescription}", 1f);
     }
 
-    // ===== FISH SELLING =====
     public void SellFish(FishSellData fishData, int quantity)
     {
-        // Kiểm tra có cá trong inventory không
         var fishInInventory = playerInventory._invenItems?.Find(item => item.name == fishData.fishType);
 
         if (fishInInventory == null || fishInInventory.quantity < quantity)
@@ -168,27 +166,24 @@ public class NpcFishermanController : MonoBehaviour
             return;
         }
 
-        // Tính tiền
         int totalPrice = fishData.sellPrice * quantity;
 
         int totalExperience = fishData.experienceReward * quantity;
 
 
-        // Cộng gold
         LoadDataManager.userInGame.Gold += totalPrice;
 
         if (LevelSystem.Instance != null)
         {
             LevelSystem.Instance.AddExperience(totalExperience);
-            Debug.Log($"✅ +{totalExperience} Exp từ bán cá");
+            Debug.Log($" +{totalExperience} Exp từ bán cá");
         }
-        // Trừ cá khỏi inventory
         playerInventory.RemoveInventoryItem(fishData.fishType, quantity);
 
         SaveUserDataToFirebase();
         UpdateGoldDisplay();
         UsernameWizard.UpdateGoldDisplay();
-        RefreshFishSellButtons(); // Cập nhật lại buttons
+        RefreshFishSellButtons();
 
         Debug.Log($"Đã bán {quantity}x {fishData.fishType} với giá {totalPrice} gold");
     }

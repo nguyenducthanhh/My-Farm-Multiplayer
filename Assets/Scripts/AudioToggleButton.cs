@@ -4,8 +4,8 @@ using UnityEngine.UI;
 public class AudioToggleButton : MonoBehaviour
 {
     [SerializeField] private Button muteButton;
-    [SerializeField] private Image soundOnImage;    // Hiển thị khi bật
-    [SerializeField] private Image soundOffImage;   // Hiển thị khi tắt
+    [SerializeField] private Image soundOnImage;
+    [SerializeField] private Image soundOffImage;
 
     private void Start()
     {
@@ -19,31 +19,28 @@ public class AudioToggleButton : MonoBehaviour
     {
         AudioManager.Instance.ToggleMute();
         UpdateAudioIcon();
-        Debug.Log("🔊 Audio toggled");
+        Debug.Log(" Audio toggled");
     }
 
-    // ✅ Cập nhật hiển thị image
     private void UpdateAudioIcon()
     {
         if (AudioManager.Instance.IsMuted())
         {
-            // Tắt âm thanh → hiển thị icon tắt
             if (soundOnImage != null)
                 soundOnImage.gameObject.SetActive(false);
             if (soundOffImage != null)
                 soundOffImage.gameObject.SetActive(true);
 
-            Debug.Log("🔇 Showing muted icon");
+            Debug.Log(" Showing muted icon");
         }
         else
         {
-            // Bật âm thanh → hiển thị icon bật
             if (soundOnImage != null)
                 soundOnImage.gameObject.SetActive(true);
             if (soundOffImage != null)
                 soundOffImage.gameObject.SetActive(false);
 
-            Debug.Log("🔊 Showing unmuted icon");
+            Debug.Log(" Showing unmuted icon");
         }
     }
 }

@@ -3,8 +3,8 @@ using UnityEngine;
 
 public class AudioManager : MonoBehaviour
 {
-    [SerializeField] private AudioSource musicSource;      // Nhạc nền
-    [SerializeField] private AudioSource effectSource;     // Âm thanh hiệu ứng
+    [SerializeField] private AudioSource musicSource;
+    [SerializeField] private AudioSource effectSource;
 
     [Header("Farm Sounds")]
     [SerializeField] private AudioClip hoeSound;
@@ -21,7 +21,7 @@ public class AudioManager : MonoBehaviour
     [SerializeField] private AudioClip buttonClickSound;
     [SerializeField] private AudioClip successSound;
 
-    // ✅ Mute control
+    // Mute control
     private bool isMuted = false;
 
     public static AudioManager Instance { get; private set; }
@@ -31,10 +31,8 @@ public class AudioManager : MonoBehaviour
         if (Instance == null)
         {
             Instance = this;
-            Debug.Log("✅ AudioManager initialized");
 
-            // ✅ Load mute state từ PlayerPrefs
-            isMuted = PlayerPrefs.GetInt("AudioMuted", 0) == 1;
+            isMuted = PlayerPrefs.GetInt("AudioMuted", defaultValue: 0) == 1;
             ApplyMuteState();
         }
         else
@@ -43,20 +41,18 @@ public class AudioManager : MonoBehaviour
         }
     }
 
-    // ✅ Bật/tắt âm thanh toàn bộ
     public void ToggleMute()
     {
         isMuted = !isMuted;
         ApplyMuteState();
 
-        // ✅ Lưu state
         PlayerPrefs.SetInt("AudioMuted", isMuted ? 1 : 0);
         PlayerPrefs.Save();
 
-        Debug.Log(isMuted ? "🔇 MUTED" : "🔊 UNMUTED");
+        Debug.Log(isMuted ? " MUTED" : " UNMUTED");
     }
 
-    // ✅ Áp dụng trạng thái mute
+    // Áp dụng trạng thái mute
     private void ApplyMuteState()
     {
         if (isMuted)
@@ -71,13 +67,13 @@ public class AudioManager : MonoBehaviour
         }
     }
 
-    // ✅ Kiểm tra trạng thái mute
+    // Kiểm tra trạng thái mute
     public bool IsMuted()
     {
         return isMuted;
     }
 
-    // ✅ Farm Actions
+    //  Farm Actions
     public void PlayHoeSound()
     {
         if (effectSource == null || hoeSound == null) return;
@@ -102,7 +98,7 @@ public class AudioManager : MonoBehaviour
         effectSource.PlayOneShot(harvestSound);
     }
 
-    // ✅ Fishing Actions
+    // Fishing Actions
     public void PlayCastSound()
     {
         if (effectSource == null || castSound == null) return;
@@ -115,7 +111,7 @@ public class AudioManager : MonoBehaviour
         effectSource.PlayOneShot(reelSound);
     }
 
-    // ✅ UI Sounds
+    // UI Sounds
     public void PlayCoinSound()
     {
         if (effectSource == null || coinSound == null) return;
@@ -134,7 +130,7 @@ public class AudioManager : MonoBehaviour
         effectSource.PlayOneShot(successSound);
     }
 
-    // ✅ Music Control
+    // Music Control
     public void PlayMusic()
     {
         if (musicSource == null) return;

@@ -10,8 +10,8 @@ public class ItemData : ScriptableObject
     public int maxStack = 99;
 
     [Header("Inventory Sprites")]
-    public Sprite seedSprite;           // Sprite hạt giống trong inventory
-    public Sprite harvestedSprite;      // Sprite quả thu hoạch trong inventory
+    public Sprite seedSprite;  
+    public Sprite harvestedSprite; 
 
     [Header("Shop Info")]
     public int basePrice = 10;
@@ -25,29 +25,10 @@ public class ItemData : ScriptableObject
     public bool isTool = false;
 
     [Header("Harvest Info")]
-    public string harvestedItemName;    // "pumpkin_fruit"
-    public int harvestQuantity = 1;     // Số lượng thu hoạch
+    public string harvestedItemName;
+    public int harvestQuantity = 1;
 
-    // Method để lấy sprite cho inventory
-    //public Sprite GetInventorySprite(ItemContext context)
-    //{
-    //    switch (context)
-    //    {
-    //        case ItemContext.Seed:
-    //            return seedSprite;
-    //        case ItemContext.Harvested:
-    //            return harvestedSprite;
-    //        case ItemContext.Default:
-    //        default:
-    //            return harvestedSprite != null ? harvestedSprite : seedSprite;
-    //    }
-    //}
 }
 
-//public enum ItemContext
-//{
-//    Default,
-//    Seed,       // Hạt giống
-//    Harvested   // Quả thu hoạch
-//}
+
 

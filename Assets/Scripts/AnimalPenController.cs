@@ -13,12 +13,12 @@ public class AnimalPenController : MonoBehaviour
     [SerializeField] private string penId;
     [SerializeField] private AnimalType animalType;
     [SerializeField] private int feedQuantityRequired = 1;
-    [SerializeField] private string feedItemType = "paddy";
+    [SerializeField] private string feedItemType = "Paddy";
     [SerializeField] private float feedDuration = 60f;
     [SerializeField] private string productItemType = "egg";
 
     [Header("Animation - Multiple Animals")]
-    [SerializeField] private List<Animator> animalAnimators = new List<Animator>();  // ← List of Animators
+    [SerializeField] private List<Animator> animalAnimators = new List<Animator>();
     [SerializeField] private string isEatingParameterName = "IsEating";
 
     [Header("UI References")]
@@ -30,7 +30,7 @@ public class AnimalPenController : MonoBehaviour
     [SerializeField] private RecyclableInventory playerInventory;
 
     [Header("Lock Overlay Squares")]
-    [SerializeField] private GameObject lockOverlay1;  // Square lock phía trên trái
+    [SerializeField] private GameObject lockOverlay1;
     [SerializeField] private GameObject lockOverlay2;
     [SerializeField] private GameObject lockOverlay3;
     private bool playerInRange = false;
@@ -57,7 +57,6 @@ public class AnimalPenController : MonoBehaviour
 
     private void Start()
     {
-        // ✅ DELAY: Chờ LevelSystem load xong trước khi kiểm tra
         StartCoroutine(CheckPenUnlockAfterDelay());
 
         if (feedButton != null)
@@ -68,20 +67,18 @@ public class AnimalPenController : MonoBehaviour
 
         uiPanel?.SetActive(false);
 
-        // ✅ Auto-find Animators nếu list trống
         if (animalAnimators.Count == 0)
         {
             AutoFindAnimators();
         }
 
-        // ✅ Kiểm tra Animators
         if (animalAnimators.Count == 0)
         {
-            Debug.LogError($"❌ No Animators found on {gameObject.name}!");
+            Debug.LogError($" No Animators found on {gameObject.name}!");
         }
         else
         {
-            Debug.Log($"✅ Found {animalAnimators.Count} Animators");
+            Debug.Log($" Found {animalAnimators.Count} Animators");
         }
 
         LoadPenDataFromFirebase();
@@ -90,35 +87,31 @@ public class AnimalPenController : MonoBehaviour
         SetAllAnimalsState(false);
     }
 
-    // ✅ THÊM: Coroutine chờ LevelSystem load xong
-    // ✅ THÊM: Coroutine chờ LevelSystem load xong
+
     private IEnumerator CheckPenUnlockAfterDelay()
     {
-        // Chờ 0.5 giây để LevelSystem load xong
         yield return new WaitForSeconds(0.5f);
 
         string penUnlockName = GetPenUnlockName();
-        Debug.Log($"🐷 Checking pen unlock: {penUnlockName}");
+        Debug.Log($"Checking pen unlock: {penUnlockName}");
 
         if (LevelSystem.Instance == null)
         {
-            Debug.LogError("❌ LevelSystem.Instance is NULL!");
+            Debug.LogError(" LevelSystem.Instance is NULL!");
             yield break;
         }
 
         if (!LevelSystem.Instance.IsItemUnlocked(penUnlockName))
         {
             int requiredLevel = LevelSystem.Instance.GetRequiredLevelForItem(penUnlockName);
-            Debug.Log($"🔒 Chuồng chưa mở khóa! Cần cấp {requiredLevel}");
+            Debug.Log($"Chuồng chưa mở khóa! Cần cấp {requiredLevel}");
 
-            // ✅ Disable chuồng
             ShowLockOverlays();
             penUnlocked = false;
-            //gameObject.SetActive(false);
-            yield break;  // ← Thay return bằng yield break
+            yield break;
         }
 
-        Debug.Log($"✅ Chuồng '{penUnlockName}' đã mở khóa!");
+        Debug.Log($" Chuồng '{penUnlockName}' đã mở khóa!");
         HideLockOverlays();
         penUnlocked = true;
     }
@@ -132,10 +125,9 @@ public class AnimalPenController : MonoBehaviour
         if (lockOverlay3 != null)
             lockOverlay3.SetActive(true);
 
-        Debug.Log("🔒 Lock overlays shown");
+        Debug.Log("Lock overlays shown");
     }
 
-    // ✅ THÊM: Ẩn lock overlays
     private void HideLockOverlays()
     {
         if (lockOverlay1 != null)
@@ -146,7 +138,7 @@ public class AnimalPenController : MonoBehaviour
 
         if (lockOverlay3 != null)
             lockOverlay3.SetActive(false);
-        Debug.Log("🔓 Lock overlays hidden");
+        Debug.Log(" Lock overlays hidden");
     }
 
     private void OnTriggerEnter2D(Collider2D collision)
@@ -171,19 +163,16 @@ public class AnimalPenController : MonoBehaviour
     {
         UpdatePenUnlockStatus();
 
-        // ✅ LUÔN kiểm tra xem ăn xong chưa (bất kể player ở đâu)
         if (isFeeding && DateTime.UtcNow >= nextFeedTime)
         {
             isFeeding = false;
             canCollect = true;
 
-            // ✅ Set tất cả con vật về Sleeping ngay (không cần player ở gần)
             SetAllAnimalsState(false);
 
             SavePenDataToFirebase();
         }
 
-        // ✅ CHỈ update UI khi player ở gần
         if (playerInRange)
         {
             UpdateUIStatus();
@@ -198,17 +187,15 @@ public class AnimalPenController : MonoBehaviour
         string penUnlockName = GetPenUnlockName();
         bool isCurrentlyUnlocked = LevelSystem.Instance.IsItemUnlocked(penUnlockName);
 
-        // Nếu vừa mở khóa (từ false → true)
         if (isCurrentlyUnlocked && !penUnlocked)
         {
-            Debug.Log($"🎉 {penUnlockName} vừa được mở khóa!");
+            Debug.Log($" {penUnlockName} vừa được mở khóa!");
             penUnlocked = true;
             HideLockOverlays();
         }
-        // Nếu vừa bị khóa lại (từ true → false)
         else if (!isCurrentlyUnlocked && penUnlocked)
         {
-            Debug.Log($"🔒 {penUnlockName} bị khóa lại!");
+            Debug.Log($" {penUnlockName} bị khóa lại!");
             penUnlocked = false;
             ShowLockOverlays();
         }
@@ -234,21 +221,18 @@ public class AnimalPenController : MonoBehaviour
 
     private void UpdateUIStatus()
     {
-        // ✅ THÊM: Kiểm tra xem chuồng đã mở khóa chưa
         if (!penUnlocked)
         {
-            // ❌ Chưa mở khóa - ẩn tất cả button
             if (feedButton != null)
                 feedButton.gameObject.SetActive(false);
 
             if (collectButton != null)
                 collectButton.gameObject.SetActive(false);
 
-            Debug.Log("🔒 Buttons hidden - Pen not unlocked");
-            return;  // ← Dừng lại, không tiếp tục
+            Debug.Log("Buttons hidden - Pen not unlocked");
+            return;  
         }
 
-        // ✅ Đã mở khóa - tiếp tục logic bình thường
         if (canCollect)
         {
             if (feedButton != null)
@@ -281,21 +265,20 @@ public class AnimalPenController : MonoBehaviour
     private void OnFeedButtonClicked()
     {
 
-        // ✅ Kiểm tra xem chuồng đã mở khóa chưa (QUAN TRỌNG)
         if (!penUnlocked)
         {
             string penUnlockName = GetPenUnlockName();
             int requiredLevel = LevelSystem.Instance.GetRequiredLevelForItem(penUnlockName);
             int currentLevel = LevelSystem.Instance.GetCurrentLevel();
 
-            Debug.LogWarning($"❌ Chuồng chưa mở khóa! Cần cấp {requiredLevel}, hiện tại cấp {currentLevel}");
-            return;  // ← KHÔNG cho ăn nếu chưa mở khóa
+            Debug.LogWarning($" Chuồng chưa mở khóa! Cần cấp {requiredLevel}, hiện tại cấp {currentLevel}");
+            return;
         }
 
-        // ✅ Kiểm tra xem có đủ thức ăn không
         if (!CanFeed())
         {
-            Debug.Log($"❌ Không đủ {GetFeedItemName()}!");
+            Debug.Log($" Không đủ {GetFeedItemName()}!");
+            NotificationManager.ShowReward($"Không đủ {GetFeedItemName()}!", 1f);
             return;
         }
 
@@ -307,7 +290,7 @@ public class AnimalPenController : MonoBehaviour
 
         SetAllAnimalsState(true);
 
-        Debug.Log($"✅ {GetAnimalName()} bắt đầu ăn, sẽ xong sau {feedDuration}s");
+        Debug.Log($" {GetAnimalName()} bắt đầu ăn, sẽ xong sau {feedDuration}s");
 
         SavePenDataToFirebase();
         UpdateUIStatus();
@@ -316,20 +299,19 @@ public class AnimalPenController : MonoBehaviour
     private void OnCollectButtonClicked()
     {
  
-        // ✅ Kiểm tra xem chuồng đã mở khóa chưa (QUAN TRỌNG)
         if (!penUnlocked)
         {
             string penUnlockName = GetPenUnlockName();
             int requiredLevel = LevelSystem.Instance.GetRequiredLevelForItem(penUnlockName);
             int currentLevel = LevelSystem.Instance.GetCurrentLevel();
 
-            Debug.LogWarning($"❌ Chuồng chưa mở khóa! Cần cấp {requiredLevel}, hiện tại cấp {currentLevel}");
-            return;  // ← KHÔNG thu hoạch nếu chưa mở khóa
+            Debug.LogWarning($" Chuồng chưa mở khóa! Cần cấp {requiredLevel}, hiện tại cấp {currentLevel}");
+            return;
         }
 
         if (!canCollect)
         {
-            Debug.Log("❌ Chưa có sản phẩm để thu thập!");
+            Debug.Log(" Chưa có sản phẩm để thu thập!");
             return;
         }
 
@@ -349,55 +331,52 @@ public class AnimalPenController : MonoBehaviour
 
         SetAllAnimalsState(false);
 
-        Debug.Log($"✅ Thu thập được 1 {productDescription}");
-
+        Debug.Log($" Thu thập được x1 {productDescription}");
+        NotificationManager.ShowReward($"Thu thập được x1 {productDescription}!", 1f);
         SavePenDataToFirebase();
         UpdateUIStatus();
     }
 
-    // ✅ THÊM: Auto-find Animators từ children
     private void AutoFindAnimators()
     {
         var animators = GetComponentsInChildren<Animator>();
 
-        Debug.Log($"🔍 Found {animators.Length} Animators in children");
+        Debug.Log($" Found {animators.Length} Animators in children");
 
         animalAnimators.Clear();
 
         foreach (var animator in animators)
         {
-            // Bỏ qua Animator của chính chuồng (nếu có)
             if (animator.gameObject != gameObject)
             {
                 animalAnimators.Add(animator);
-                Debug.Log($"✅ Added animator: {animator.gameObject.name}");
+                Debug.Log($" Added animator: {animator.gameObject.name}");
             }
         }
 
-        Debug.Log($"📊 Total animals: {animalAnimators.Count}");
+        Debug.Log($" Total animals: {animalAnimators.Count}");
     }
 
-    // ✅ THÊM: Set animation state cho TẤT CẢ con vật
     private void SetAllAnimalsState(bool isEating)
     {
         if (animalAnimators == null || animalAnimators.Count == 0)
         {
-            Debug.LogError("❌ No Animators in list!");
+            Debug.LogError(" No Animators in list!");
             return;
         }
 
-        Debug.Log($"🎬 SetAllAnimalsState: IsEating = {isEating} for {animalAnimators.Count} animals");
+        Debug.Log($" SetAllAnimalsState: IsEating = {isEating} for {animalAnimators.Count} animals");
 
         foreach (var animator in animalAnimators)
         {
             if (animator != null)
             {
                 animator.SetBool(isEatingParameterName, isEating);
-                Debug.Log($"   ✅ {animator.gameObject.name}: IsEating = {isEating}");
+                Debug.Log($"    {animator.gameObject.name}: IsEating = {isEating}");
             }
             else
             {
-                Debug.LogWarning("❌ Animator is NULL in list!");
+                Debug.LogWarning(" Animator is NULL in list!");
             }
         }
     }
@@ -450,11 +429,10 @@ public class AnimalPenController : MonoBehaviour
                             nextFeedTime = new DateTime(penData.nextFeedTimeTicks, DateTimeKind.Utc);
                             canCollect = penData.canCollect;
 
-                            Debug.Log($"✅ Loaded pen data: isFeeding={isFeeding}, canCollect={canCollect}");
+                            Debug.Log($" Loaded pen data: isFeeding={isFeeding}, canCollect={canCollect}");
 
                             CheckFeedingStatus();
 
-                            // ✅ Set animation based on state
                             SetAllAnimalsState(isFeeding);
                         }
                     }
@@ -499,7 +477,7 @@ public class AnimalPenController : MonoBehaviour
             {
                 if (task.IsCompleted)
                 {
-                    Debug.Log($"✅ Saved pen data: {penId}");
+                    Debug.Log($" Saved pen data: {penId}");
                 }
                 else
                 {

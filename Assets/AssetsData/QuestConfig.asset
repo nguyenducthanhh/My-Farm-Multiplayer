@@ -15,7 +15,7 @@ MonoBehaviour:
   allQuests:
   - questId: 1
     questName: "Nhi\u1EC7m v\u1EE5 1"
-    questDescription: "Mang 1 l\xFAa \u0111\u1EBFn cho t\xF4i"
+    questDescription: "Mang x1 l\xFAa \u0111\u1EBFn cho t\xF4i"
     requirements:
     - itemName: Paddy_fruit
       quantity: 1
@@ -24,46 +24,82 @@ MonoBehaviour:
     rewardExperience: 40
   - questId: 2
     questName: "Nhi\u1EC7m v\u1EE5 2"
-    questDescription: "Mang 2 l\xFAa \u0111\u1EBFn cho t\xF4i"
+    questDescription: "Mang x2 l\xFAa \u0111\u1EBFn cho t\xF4i"
     requirements:
     - itemName: Paddy_fruit
       quantity: 2
       itemDescription: "L\xFAa"
     rewardGold: 30
-    rewardExperience: 40
+    rewardExperience: 50
   - questId: 3
     questName: "Nhi\u1EC7m v\u1EE5 3"
-    questDescription: "Mang 3 l\xFAa \u0111\u1EBFn cho t\xF4i"
+    questDescription: "H\xE3y mang x1 b\u1ED9t m\xEC \u0111\u1EBFn cho t\xF4i"
     requirements:
-    - itemName: Paddy_fruit
-      quantity: 3
-      itemDescription: "L\xFAa"
-    rewardGold: 40
-    rewardExperience: 40
+    - itemName: flour_item
+      quantity: 1
+      itemDescription: "B\u1ED9t m\xEC"
+    rewardGold: 30
+    rewardExperience: 60
   - questId: 4
     questName: "Nhi\u1EC7m v\u1EE5 4"
-    questDescription: "Mang 1 tr\u1EE9ng \u0111\u1EBFn cho t\xF4i"
+    questDescription: "H\xE3y mang x1 b\xE1nh m\xEC \u0111\u1EBFn cho t\xF4i"
     requirements:
-    - itemName: egg_item
+    - itemName: bread
       quantity: 1
-      itemDescription: "Tr\u1EE9ng"
-    rewardGold: 50
+      itemDescription: "b\xE1nh m\xEC"
+    rewardGold: 40
     rewardExperience: 40
   - questId: 5
-    questName: "Ng\xF4"
-    questDescription: "Mang 3 ng\xF4 \u0111\u1EBFn cho t\xF4i"
+    questName: "Nhi\u1EC7m v\u1EE5 5"
+    questDescription: "H\xE3y mang x1 r\u01B0\u1EE3u nho v\xE0 x1 tr\u1EE9ng g\xE0
+      \u0111\u1EBFn cho t\xF4i"
+    requirements:
+    - itemName: wine
+      quantity: 1
+      itemDescription: "R\u01B0\u1EE3u nho"
+    - itemName: egg_item
+      quantity: 1
+      itemDescription: "Tr\u1EE9ng g\xE0"
+    rewardGold: 50
+    rewardExperience: 50
+  - questId: 6
+    questName: "Nhi\u1EC7m v\u1EE5 6"
+    questDescription: "H\xE3y mang x3 ng\xF4 \u0111\u1EBFn cho t\xF4i"
     requirements:
     - itemName: Corn_fruit
       quantity: 3
       itemDescription: "Ng\xF4"
-    rewardGold: 10
-    rewardExperience: 40
-  - questId: 6
-    questName: Nho
-    questDescription: "Mang 3 nho \u0111\u1EBFn cho t\xF4i"
+    rewardGold: 40
+    rewardExperience: 70
+  - questId: 7
+    questName: "Nhi\u1EC7m v\u1EE5 \u0111\u1EB7c bi\u1EC7t 1"
+    questDescription: "H\xE3y mang x1 c\xE1 v\xE0ng \u0111\u1EBFn cho t\xF4i"
     requirements:
-    - itemName: Grape_fruit
-      quantity: 3
-      itemDescription: Nho
-    rewardGold: 10
-    rewardExperience: 40
+    - itemName: gold_fish
+      quantity: 1
+      itemDescription: "C\xE1 v\xE0ng"
+    rewardGold: 50
+    rewardExperience: 150
+  - questId: 8
+    questName: "Nhi\u1EC7m v\u1EE5 7"
+    questDescription: "H\xE3y mang x1 th\u1ECBt l\u1EE3n n\u01B0\u1EDBng \u0111\u1EBFn
+      cho t\xF4i"
+    requirements:
+    - itemName: roast_pork
+      quantity: 1
+      itemDescription: "Th\u1ECBt l\u1EE3n n\u01B0\u1EDBng"
+    rewardGold: 40
+    rewardExperience: 80
+  - questId: 9
+    questName: "Nhi\u1EC7m v\u1EE5 8"
+    questDescription: "H\xE3y mang x1 th\u1ECBt l\u1EE3n n\u01B0\u1EDBng v\xE0 x1
+      r\u01B0\u1EE3u nho \u0111\u1EBFn cho t\xF4i"
+    requirements:
+    - itemName: roast_pork
+      quantity: 1
+      itemDescription: "Th\u1ECBt l\u1EE3n n\u01B0\u1EDBng"
+    - itemName: wine
+      quantity: 1
+      itemDescription: "R\u01B0\u1EE3u nho"
+    rewardGold: 40
+    rewardExperience: 80
